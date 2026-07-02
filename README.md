@@ -71,9 +71,9 @@ Manual evaluation of AI-generated responses is subjective, time-consuming, and d
 AI-Response-Quality-Evaluator/
 │
 ├── README.md
-├── requirements.txt
 ├── LICENSE
 ├── .gitignore
+├── requirements.txt
 │
 ├── docs/
 │   ├── RESEARCH.md
@@ -83,12 +83,7 @@ AI-Response-Quality-Evaluator/
 │   ├── DATA_MODELS.md
 │   └── PROJECT_PLAN.md
 │
-├── diagrams/
-├── backend/
-├── frontend/
-├── datasets/
-├── vector_store/
-└── evaluation/
+└── diagrams/
 ```
 
 ---
