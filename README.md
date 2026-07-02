@@ -112,35 +112,6 @@ AI-Response-Quality-Evaluator/
 
 ---
 
-## Current Milestone
-
-**Milestone 1 (30 June – 9 July)**
-
-- Research on LLM Evaluation Techniques
-- Hallucination Detection Methods
-- RAG Architecture
-- RAGAS & TruLens
-- System Architecture Design
-- Agent Responsibilities
-- Scoring Dimensions
-- Data Models
-- Project Documentation
-
----
-
-## Documentation
-
-Detailed project documentation is available in the **docs/** directory.
-
-- Research
-- System Design
-- Technology Stack
-- Agent Design
-- Data Models
-- Project Timeline
-
----
-
 ## Author
 
 **Abhinav Goel**
