@@ -10,8 +10,6 @@ Large Language Models (LLMs) such as ChatGPT, Gemini, Claude, and Llama can gene
 
 The **AI Response Quality Evaluator Agent** is designed to automatically evaluate AI-generated responses across multiple quality dimensions instead of generating responses itself. The system follows a modular multi-agent architecture and leverages Retrieval-Augmented Generation (RAG) to provide reliable and explainable evaluation results.
 
-This project is being developed as part of the **Infosys Springboard Internship Program**.
-
 ---
 
 ## Problem Statement
