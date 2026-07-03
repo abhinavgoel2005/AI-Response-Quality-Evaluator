@@ -155,5 +155,3 @@ Future improvements include:
 ## 9. Summary
 
 The proposed architecture provides a simple and modular approach for evaluating AI-generated responses. Instead of relying on a single evaluation metric, the system analyzes multiple quality parameters before generating a final quality report.
-
-This design forms the foundation for the implementation of the AI Response Quality Evaluator Agent in the upcoming milestones of the Infosys Springboard Internship Project.
