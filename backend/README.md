@@ -1,10 +1,16 @@
 # Backend Module
 
-Currently contains the retrieval logic used by the Flask prototype.
+This folder contains the backend logic for the Milestone 1 prototype.
+
+Current implementation:
+
+- Reference Knowledge Base
+- Knowledge Retrieval Module
 
 Future milestones will include:
 
-- Multi-Agent Pipeline
-- Orchestrator
+- Multi-Agent Evaluation Pipeline
+- Orchestration Layer
 - RAG Pipeline
 - Scoring Module
+- Dashboard APIs
