@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>AI Response Quality Evaluator</title>
+
+    <style>
+
+        body{
+            font-family:Arial, Helvetica, sans-serif;
+            background:#f4f4f4;
+            padding:40px;
+        }
+
+        .container{
+
+            width:800px;
+            margin:auto;
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0px 0px 10px rgba(0,0,0,0.2);
+
+        }
+
+        textarea{
+
+            width:100%;
+            height:120px;
+            margin-top:5px;
+            margin-bottom:20px;
+            padding:10px;
+            resize:none;
+
+        }
+
+        button{
+
+            background:#0d6efd;
+            color:white;
+            border:none;
+            padding:12px 22px;
+            cursor:pointer;
+            font-size:16px;
+
+        }
+
+        button:hover{
+
+            background:#0b5ed7;
+
+        }
+
+        .chunk{
+
+            background:#f8f9fa;
+            padding:15px;
+            margin-bottom:15px;
+            border-left:5px solid #0d6efd;
+
+        }
+
+        .summary{
+
+            background:#eef8ff;
+            padding:15px;
+            border-radius:8px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🤖 AI Response Quality Evaluator</h1>
+
+<p style="color:gray;">
+Prototype for evaluating AI-generated responses using a reference knowledge base.
+</p>
+
+<hr>
+
+<form action="/submit" method="POST">
+
+<label><b>User Question</b></label>
+
+<textarea name="question">{{ question or '' }}</textarea>
+
+<label><b>AI Generated Response</b></label>
+
+<textarea name="response">{{ ai_response or '' }}</textarea>
+
+<label><b>Reference Answer (Optional)</b></label>
+
+<textarea name="reference">{{ reference or '' }}</textarea>
+
+<button type="submit">
+
+Submit
+
+</button>
+
+</form>
+
+{% if question %}
+
+<hr>
+
+<h2>Submitted Information</h2>
+
+<p><b>Question:</b></p>
+
+<p>{{ question }}</p>
+
+<p><b>AI Generated Response:</b></p>
+
+<p>{{ ai_response }}</p>
+
+<p><b>Reference Answer:</b></p>
+
+<p>{{ reference if reference else "Not Provided" }}</p>
+
+<hr>
+
+<h2>Retrieved Knowledge</h2>
+
+{% if retrieved_chunks %}
+
+    {% for chunk in retrieved_chunks %}
+
+        <div class="chunk">
+
+            <h4>Chunk {{ loop.index }}</h4>
+
+            <p>{{ chunk }}</p>
+
+        </div>
+
+    {% endfor %}
+
+{% endif %}
+
+<hr>
+
+<h2>Evaluation Summary</h2>
+
+<div class="summary">
+
+<p>✅ User question received successfully.</p>
+
+<p>✅ AI-generated response received.</p>
+
+<p>✅ Reference answer processed.</p>
+
+<p>✅ Relevant knowledge retrieved from the knowledge base.</p>
+
+<p>⏳ Multi-agent response evaluation (Accuracy, Relevance, Completeness and Hallucination Detection) will be implemented in the next milestone.</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</body>
+
+</html>
