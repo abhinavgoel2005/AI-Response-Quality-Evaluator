@@ -1,12 +1,10 @@
-# Backend
+# Backend Module
 
-The complete backend implementation will be developed in the upcoming milestones.
+Currently contains the retrieval logic used by the Flask prototype.
 
-It will include:
+Future milestones will include:
 
-- Evaluation Input Module
+- Multi-Agent Pipeline
+- Orchestrator
 - RAG Pipeline
-- Multi-Agent Evaluation
-- Orchestration Layer
 - Scoring Module
-- Dashboard APIs
