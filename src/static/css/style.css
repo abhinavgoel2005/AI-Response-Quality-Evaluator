@@ -1,0 +1,723 @@
+/* ==========================================
+   GOOGLE FONT & RESET
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    font-family:'Inter',sans-serif;
+
+    background:#F6F8FC;
+
+    color:#243B53;
+
+    line-height:1.6;
+
+}
+
+
+/* ==========================================
+   NAVBAR
+========================================== */
+
+nav{
+
+    width:92%;
+
+    max-width:1450px;
+
+    margin:30px auto;
+
+    background:#FFFFFF;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:18px;
+
+    padding:18px 35px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.05);
+
+}
+
+.logo{
+
+    font-size:22px;
+
+    font-weight:700;
+
+    color:#3B4CCA;
+
+    letter-spacing:.3px;
+
+}
+
+.nav-links{
+
+    display:flex;
+
+    gap:14px;
+
+}
+
+.nav-links span{
+
+    background:#EEF2FF;
+
+    color:#4F46E5;
+
+    padding:8px 18px;
+
+    border-radius:50px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+
+/* ==========================================
+   HERO SECTION
+========================================== */
+
+.hero{
+
+    width:92%;
+
+    max-width:1450px;
+
+    margin:auto;
+
+    text-align:center;
+
+    background:#FFFFFF;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:22px;
+
+    padding:65px 80px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.05);
+
+}
+
+.hero h1{
+
+    font-size:48px;
+
+    color:#1E293B;
+
+    margin-bottom:20px;
+
+    font-weight:700;
+
+}
+
+.hero p{
+
+    font-size:18px;
+
+    color:#64748B;
+
+    max-width:780px;
+
+    margin:auto;
+
+}
+
+
+/* ==========================================
+   MAIN CONTAINER
+========================================== */
+
+.main-container{
+
+    width:92%;
+
+    max-width:1450px;
+
+    margin:45px auto;
+
+    display:grid;
+
+    grid-template-columns:60% 40%;
+
+    gap:35px;
+
+    align-items:start;
+
+}
+
+/* ==========================================
+   WORKSPACE
+========================================== */
+
+.workspace{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.workspace h2{
+
+    font-size:30px;
+
+    color:#243B53;
+
+    margin-bottom:25px;
+
+}
+
+
+/* ==========================================
+   INPUT CARDS
+========================================== */
+
+.input-card{
+
+    background:#FFFFFF;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    margin-bottom:28px;
+
+    box-shadow:0 8px 18px rgba(0,0,0,.04);
+
+    transition:.25s;
+
+}
+
+.input-card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 14px 25px rgba(0,0,0,.08);
+
+}
+
+.input-card h3{
+
+    font-size:22px;
+
+    color:#243B53;
+
+    margin-bottom:18px;
+
+}
+
+
+/* ==========================================
+   TEXTAREA
+========================================== */
+
+textarea{
+
+    width:100%;
+
+    height:170px;
+
+    resize:none;
+
+    padding:18px;
+
+    border-radius:14px;
+
+    border:2px solid #E2E8F0;
+
+    font-size:15px;
+
+    font-family:'Inter',sans-serif;
+
+    transition:.25s;
+
+    background:#FAFBFD;
+
+}
+
+textarea:focus{
+
+    outline:none;
+
+    border-color:#5B5CEB;
+
+    background:white;
+
+    box-shadow:0 0 0 5px rgba(91,92,235,.10);
+
+}
+
+textarea::placeholder{
+
+    color:#94A3B8;
+
+}
+
+
+/* ==========================================
+   BUTTON
+========================================== */
+
+button{
+
+    width:100%;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:14px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    color:white;
+
+    background:linear-gradient(
+        135deg,
+        #5B5CEB,
+        #4F46E5
+    );
+
+    transition:.25s;
+
+}
+
+button:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 24px rgba(91,92,235,.25);
+
+}
+
+/* ==========================================
+   EVALUATION DASHBOARD
+========================================== */
+
+.dashboard{
+
+    position:sticky;
+
+    top:30px;
+
+}
+
+.dashboard-header{
+
+    background:#FFFFFF;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    margin-bottom:25px;
+
+    box-shadow:0 8px 18px rgba(0,0,0,.04);
+
+}
+
+.dashboard-header h2{
+
+    font-size:28px;
+
+    color:#243B53;
+
+    margin-bottom:8px;
+
+}
+
+.dashboard-header p{
+
+    color:#64748B;
+
+    font-size:15px;
+
+}
+
+
+/* ==========================================
+   AGENT CARDS
+========================================== */
+
+.agent-card{
+
+    background:#FFFFFF;
+
+    border-radius:18px;
+
+    padding:24px;
+
+    margin-bottom:22px;
+
+    border:1px solid #E5E7EB;
+
+    box-shadow:0 8px 18px rgba(0,0,0,.04);
+
+    transition:.25s;
+
+}
+
+.agent-card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 14px 24px rgba(0,0,0,.08);
+
+}
+
+
+/* ==========================================
+   TOP ROW
+========================================== */
+
+.agent-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:22px;
+
+}
+
+.agent-top h3{
+
+    font-size:22px;
+
+    color:#243B53;
+
+}
+
+
+/* ==========================================
+   STATUS BADGE
+========================================== */
+
+.status{
+
+    background:#EEF2FF;
+
+    color:#4F46E5;
+
+    padding:7px 16px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+/* ==========================================
+   LABELS
+========================================== */
+
+.agent-card h4{
+
+    margin-top:18px;
+
+    margin-bottom:8px;
+
+    color:#64748B;
+
+    font-size:14px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.7px;
+
+}
+
+
+/* ==========================================
+   TEXT
+========================================== */
+
+.agent-card p{
+
+    color:#334155;
+
+    line-height:1.7;
+
+    font-size:15px;
+
+}
+
+
+/* ==========================================
+   LEFT COLORED BORDER
+========================================== */
+
+.relevance{
+
+    border-left:6px solid #22C55E;
+
+}
+
+.accuracy{
+
+    border-left:6px solid #3B82F6;
+
+}
+
+.hallucination{
+
+    border-left:6px solid #F97316;
+
+}
+
+
+/* ==========================================
+   SUMMARY CARD
+========================================== */
+
+.summary-card{
+
+    background:#FFFFFF;
+
+    border-radius:18px;
+
+    padding:26px;
+
+    border:1px solid #E5E7EB;
+
+    box-shadow:0 8px 18px rgba(0,0,0,.04);
+
+}
+
+.summary-card h3{
+
+    margin-bottom:22px;
+
+    color:#243B53;
+
+}
+
+
+/* ==========================================
+   SUMMARY ITEMS
+========================================== */
+
+.summary-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:15px 0;
+
+    border-bottom:1px solid #F1F5F9;
+
+}
+
+.summary-item:last-child{
+
+    border:none;
+
+}
+
+.summary-item span:first-child{
+
+    color:#475569;
+
+    font-weight:600;
+
+}
+
+.summary-item span:last-child{
+
+    font-weight:700;
+
+    color:#4F46E5;
+
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:1100px){
+
+    .main-container{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .dashboard{
+
+        position:relative;
+
+        top:0;
+
+        margin-top:40px;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    nav{
+
+        flex-direction:column;
+
+        gap:18px;
+
+        text-align:center;
+
+    }
+
+    .nav-links{
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+    }
+
+    .hero{
+
+        padding:45px 25px;
+
+    }
+
+    .hero h1{
+
+        font-size:34px;
+
+    }
+
+    .hero p{
+
+        font-size:16px;
+
+    }
+
+    .workspace h2,
+    .dashboard-header h2{
+
+        font-size:24px;
+
+    }
+
+    .input-card{
+
+        padding:20px;
+
+    }
+
+}
+
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#F1F5F9;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#CBD5E1;
+
+    border-radius:10px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#94A3B8;
+
+}
+
+
+/* ==========================================
+   SELECTION
+========================================== */
+
+::selection{
+
+    background:#C7D2FE;
+
+    color:#1E293B;
+
+}
+
+
+/* ==========================================
+   FADE ANIMATION
+========================================== */
+
+.hero,
+.input-card,
+.dashboard-header,
+.agent-card,
+.summary-card{
+
+    animation:fadeUp .6s ease;
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(18px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}

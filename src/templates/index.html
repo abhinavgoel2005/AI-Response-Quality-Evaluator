@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Response Quality Evaluator</title>
+
+    <!-- Google Font -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav>
+
+    <div class="logo">
+
+        🤖 AI Response Quality Evaluator
+
+    </div>
+
+    <div class="nav-links">
+
+        <span>Gemini</span>
+
+        <span>RAG</span>
+
+        <span>Multi-Agent</span>
+
+    </div>
+
+</nav>
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero">
+
+    <h1>
+
+        Evaluate AI Responses with Intelligent Judge Agents
+
+    </h1>
+
+    <p>
+
+        Analyze relevance, accuracy and hallucinations
+        using Retrieval-Augmented Generation and
+        Large Language Models.
+
+    </p>
+
+</section>
+
+
+<!-- ================= MAIN ================= -->
+
+<div class="main-container">
+
+
+    <!-- LEFT PANEL -->
+
+    <section class="workspace">
+
+        <h2>
+
+            Input Workspace
+
+        </h2>
+
+        <form action="/evaluate" method="POST">
+
+            <div class="input-card">
+
+                <h3>
+
+                    💬 User Question
+
+                </h3>
+
+                <textarea
+                    name="question"
+                    placeholder="Ask your question...">{{ question if question else "" }}</textarea>
+
+            </div>
+
+            <div class="input-card">
+
+                <h3>
+
+                    🤖 AI Generated Response
+
+                </h3>
+
+                <textarea
+                    name="response"
+                    placeholder="Paste the AI generated response...">{{ response if response else "" }}</textarea>
+
+            </div>
+
+            <div class="input-card">
+
+                <h3>
+
+                    📚 Reference Answer (Optional)
+
+                </h3>
+
+                <textarea
+                    name="reference"
+                    placeholder="Optional reference answer...">{{ reference if reference else "" }}</textarea>
+
+            </div>
+
+            <button type="submit">
+
+                ✨ Evaluate Response
+
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- RIGHT PANEL -->
+
+    <aside class="dashboard">
+
+        <div class="dashboard-header">
+
+            <h2>
+
+                Evaluation Dashboard
+
+            </h2>
+
+            <p>
+
+                Waiting for evaluation...
+
+            </p>
+
+        </div>
+
+        <!-- Relevance -->
+
+        <div class="agent-card relevance">
+
+            <div class="agent-top">
+
+                <h3>
+
+                    🟢 Relevance Judge
+
+                </h3>
+
+                <span class="status">
+
+                    Ready
+
+                </span>
+
+            </div>
+
+            <h4>
+
+                Score
+
+            </h4>
+
+            <p>-- / 10</p>
+
+            <h4>
+
+                Reason
+
+            </h4>
+
+            <p>
+
+                Waiting for evaluation...
+
+            </p>
+
+        </div>
+
+
+        <!-- Accuracy -->
+
+        <div class="agent-card accuracy">
+
+            <div class="agent-top">
+
+                <h3>
+
+                    🔵 Accuracy Judge
+
+                </h3>
+
+                <span class="status">
+
+                    Ready
+
+                </span>
+
+            </div>
+
+            <h4>
+
+                Score
+
+            </h4>
+
+            <p>-- / 10</p>
+
+            <h4>
+
+                Evidence
+
+            </h4>
+
+            <p>
+
+                Waiting for evaluation...
+
+            </p>
+
+        </div>
+
+
+        <!-- Hallucination -->
+
+        <div class="agent-card hallucination">
+
+            <div class="agent-top">
+
+                <h3>
+
+                    🟠 Hallucination Judge
+
+                </h3>
+
+                <span class="status">
+
+                    Ready
+
+                </span>
+
+            </div>
+
+            <h4>
+
+                Score
+
+            </h4>
+
+            <p>-- / 10</p>
+
+            <h4>
+
+                Unsupported Claims
+
+            </h4>
+
+            <p>
+
+                Waiting for evaluation...
+
+            </p>
+
+        </div>
+
+
+        <!-- Overall -->
+
+        <div class="summary-card">
+
+            <h3>
+
+                📊 Evaluation Summary
+
+            </h3>
+
+            <div class="summary-item">
+
+                <span>Relevance</span>
+
+                <span>--</span>
+
+            </div>
+
+            <div class="summary-item">
+
+                <span>Accuracy</span>
+
+                <span>--</span>
+
+            </div>
+
+            <div class="summary-item">
+
+                <span>Hallucination</span>
+
+                <span>--</span>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+
+</html>
