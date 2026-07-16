@@ -51,7 +51,6 @@
 
 </nav>
 
-
 <!-- ================= HERO ================= -->
 
 <section class="hero">
@@ -72,31 +71,21 @@
 
 </section>
 
-
 <!-- ================= MAIN ================= -->
 
 <div class="main-container">
-
 
     <!-- LEFT PANEL -->
 
     <section class="workspace">
 
-        <h2>
-
-            Input Workspace
-
-        </h2>
+        <h2>Input Workspace</h2>
 
         <form action="/evaluate" method="POST">
 
             <div class="input-card">
 
-                <h3>
-
-                    💬 User Question
-
-                </h3>
+                <h3>💬 User Question</h3>
 
                 <textarea
                     name="question"
@@ -106,11 +95,7 @@
 
             <div class="input-card">
 
-                <h3>
-
-                    🤖 AI Generated Response
-
-                </h3>
+                <h3>🤖 AI Generated Response</h3>
 
                 <textarea
                     name="response"
@@ -120,11 +105,7 @@
 
             <div class="input-card">
 
-                <h3>
-
-                    📚 Reference Answer (Optional)
-
-                </h3>
+                <h3>📚 Reference Answer (Optional)</h3>
 
                 <textarea
                     name="reference"
@@ -142,7 +123,6 @@
 
     </section>
 
-
     <!-- RIGHT PANEL -->
 
     <aside class="dashboard">
@@ -157,142 +137,190 @@
 
             <p>
 
-                Waiting for evaluation...
+                {% if results %}
+                    Evaluation completed successfully.
+                {% else %}
+                    Waiting for evaluation...
+                {% endif %}
 
             </p>
 
         </div>
 
-        <!-- Relevance -->
+        <!-- ================= RELEVANCE ================= -->
 
         <div class="agent-card relevance">
 
             <div class="agent-top">
 
-                <h3>
-
-                    🟢 Relevance Judge
-
-                </h3>
+                <h3>🟢 Relevance Judge</h3>
 
                 <span class="status">
 
-                    Ready
+                    {% if results %}
+                        Completed
+                    {% else %}
+                        Ready
+                    {% endif %}
 
                 </span>
 
             </div>
 
-            <h4>
-
-                Score
-
-            </h4>
-
-            <p>-- / 10</p>
-
-            <h4>
-
-                Reason
-
-            </h4>
+            <h4>Score</h4>
 
             <p>
 
-                Waiting for evaluation...
+                {% if results %}
+                    {{ results.relevance.score }}/10
+                {% else %}
+                    -- /10
+                {% endif %}
+
+            </p>
+
+            <h4>Reason</h4>
+
+            <p>
+
+                {% if results %}
+                    {{ results.relevance.reason }}
+                {% else %}
+                    Waiting for evaluation...
+                {% endif %}
 
             </p>
 
         </div>
 
-
-        <!-- Accuracy -->
+        <!-- ================= ACCURACY ================= -->
 
         <div class="agent-card accuracy">
 
             <div class="agent-top">
 
-                <h3>
-
-                    🔵 Accuracy Judge
-
-                </h3>
+                <h3>🔵 Accuracy Judge</h3>
 
                 <span class="status">
 
-                    Ready
+                    {% if results %}
+                        Completed
+                    {% else %}
+                        Ready
+                    {% endif %}
 
                 </span>
 
             </div>
 
-            <h4>
-
-                Score
-
-            </h4>
-
-            <p>-- / 10</p>
-
-            <h4>
-
-                Evidence
-
-            </h4>
+            <h4>Score</h4>
 
             <p>
 
-                Waiting for evaluation...
+                {% if results %}
+                    {{ results.accuracy.score }}/10
+                {% else %}
+                    -- /10
+                {% endif %}
+
+            </p>
+
+            <h4>Evidence</h4>
+
+            <p>
+
+                {% if results %}
+                    {{ results.accuracy.evidence }}
+                {% else %}
+                    Waiting for evaluation...
+                {% endif %}
 
             </p>
 
         </div>
-
-
-        <!-- Hallucination -->
+                <!-- ================= HALLUCINATION ================= -->
 
         <div class="agent-card hallucination">
 
             <div class="agent-top">
 
-                <h3>
-
-                    🟠 Hallucination Judge
-
-                </h3>
+                <h3>🟠 Hallucination Judge</h3>
 
                 <span class="status">
 
-                    Ready
+                    {% if results %}
+                        Completed
+                    {% else %}
+                        Ready
+                    {% endif %}
 
                 </span>
 
             </div>
 
-            <h4>
-
-                Score
-
-            </h4>
-
-            <p>-- / 10</p>
-
-            <h4>
-
-                Unsupported Claims
-
-            </h4>
+            <h4>Score</h4>
 
             <p>
 
-                Waiting for evaluation...
+                {% if results %}
+                    {{ results.hallucination.score }}/10
+                {% else %}
+                    -- /10
+                {% endif %}
 
             </p>
 
+            <h4>Reason</h4>
+
+            <p>
+
+                {% if results %}
+                    {{ results.hallucination.reason }}
+                {% else %}
+                    Waiting for evaluation...
+                {% endif %}
+
+            </p>
+
+            <h4>Unsupported Claims</h4>
+
+            {% if results %}
+
+                {% if results.hallucination.unsupported_claims %}
+
+                    <ul>
+
+                        {% for claim in results.hallucination.unsupported_claims %}
+
+                            <li>{{ claim }}</li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                {% else %}
+
+                    <p>
+
+                        No unsupported claims detected.
+
+                    </p>
+
+                {% endif %}
+
+            {% else %}
+
+                <p>
+
+                    Waiting for evaluation...
+
+                </p>
+
+            {% endif %}
+
         </div>
 
-
-        <!-- Overall -->
+        <!-- ================= SUMMARY ================= -->
 
         <div class="summary-card">
 
@@ -306,7 +334,15 @@
 
                 <span>Relevance</span>
 
-                <span>--</span>
+                <span>
+
+                    {% if results %}
+                        {{ results.relevance.score }}/10
+                    {% else %}
+                        --
+                    {% endif %}
+
+                </span>
 
             </div>
 
@@ -314,7 +350,15 @@
 
                 <span>Accuracy</span>
 
-                <span>--</span>
+                <span>
+
+                    {% if results %}
+                        {{ results.accuracy.score }}/10
+                    {% else %}
+                        --
+                    {% endif %}
+
+                </span>
 
             </div>
 
@@ -322,9 +366,43 @@
 
                 <span>Hallucination</span>
 
-                <span>--</span>
+                <span>
+
+                    {% if results %}
+                        {{ results.hallucination.score }}/10
+                    {% else %}
+                        --
+                    {% endif %}
+
+                </span>
 
             </div>
+
+            {% if results %}
+
+            <hr style="margin:20px 0; border:none; border-top:1px solid #e5e7eb;">
+
+            <div class="summary-item">
+
+                <span><strong>Overall Score</strong></span>
+
+                <span>
+
+                    {{
+                    (
+                        (
+                            results.relevance.score
+                            + results.accuracy.score
+                            + results.hallucination.score
+                        ) / 3
+                    ) | round(1)
+                    }}/10
+
+                </span>
+
+            </div>
+
+            {% endif %}
 
         </div>
 

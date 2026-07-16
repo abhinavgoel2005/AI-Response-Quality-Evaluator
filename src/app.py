@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request
+from backend.evaluator import ResponseEvaluator
 
 app = Flask(__name__)
-
+evaluator = ResponseEvaluator()
 
 @app.route("/")
 def home():
@@ -15,23 +16,11 @@ def evaluate():
     response = request.form["response"]
     reference = request.form["reference"]
 
-    # Placeholder values (Milestone 2 agents will replace these)
-    results = {
-        "relevance": {
-            "score": None,
-            "reason": None
-        },
-        "accuracy": {
-            "score": None,
-            "reason": None,
-            "evidence": None
-        },
-        "hallucination": {
-            "score": None,
-            "reason": None,
-            "claims": None
-        }
-    }
+    results = evaluator.evaluate(
+    question,
+    response,
+    reference
+    )
 
     return render_template(
         "index.html",

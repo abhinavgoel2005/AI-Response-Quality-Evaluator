@@ -20,16 +20,23 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 
 def generate_response(prompt: str):
 
-    """
-    Sends prompt to Gemini
-    and returns generated text.
-    """
-
     try:
 
         response = model.generate_content(prompt)
 
-        return response.text
+        text = response.text.strip()
+
+        # Remove markdown code block if Gemini adds it
+        if text.startswith("```json"):
+            text = text.replace("```json", "", 1)
+
+        if text.startswith("```"):
+            text = text.replace("```", "", 1)
+
+        if text.endswith("```"):
+            text = text[:-3]
+
+        return text.strip()
 
     except Exception as e:
 
