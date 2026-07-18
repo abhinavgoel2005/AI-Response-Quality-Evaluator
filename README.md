@@ -1,182 +1,539 @@
-# AI Response Quality Evaluator Agent
+# 🤖 AI Response Quality Evaluator
 
-> An intelligent multi-agent system for evaluating the quality of Large Language Model (LLM) responses using Retrieval-Augmented Generation (RAG) and modern LLM evaluation frameworks.
+> An intelligent multi-agent framework for evaluating the quality of Large Language Model (LLM) responses using Retrieval-Augmented Generation (RAG), benchmark datasets, and specialized AI judges.
 
----
+<p align="center">
 
-## Project Overview
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Flask](https://img.shields.io/badge/Flask-Web_App-black)
+![Gemini](https://img.shields.io/badge/Google-Gemini-blue)
+![RAG](https://img.shields.io/badge/RAG-Enabled-green)
+![TruthfulQA](https://img.shields.io/badge/Benchmark-TruthfulQA-orange)
+![License](https://img.shields.io/badge/License-MIT-success)
 
-Large Language Models (LLMs) such as ChatGPT, Gemini, Claude, and Llama can generate highly fluent and context-aware responses. However, these responses may sometimes be inaccurate, incomplete, irrelevant, or hallucinated.
-
-The **AI Response Quality Evaluator Agent** is designed to automatically evaluate AI-generated responses across multiple quality dimensions instead of generating responses itself. The system follows a modular multi-agent architecture and leverages Retrieval-Augmented Generation (RAG) to provide reliable and explainable evaluation results.
-
----
-
-## Project Status
-
-**Current Progress (Milestone 1)**
-
-The project currently includes:
-
-- Research on LLM evaluation techniques
-- System architecture and design documentation
-- Evaluation Input Module
-- Flask-based prototype UI
-- Reference Knowledge Base
-- Knowledge Retrieval Module
-
-The multi-agent evaluation pipeline, scoring engine, and analytics dashboard will be implemented in the upcoming milestones.
+</p>
 
 ---
 
-## Problem Statement
+# 📖 Project Overview
 
-Manual evaluation of AI-generated responses is subjective, time-consuming, and difficult to scale. There is a need for an automated evaluation system that can assess response quality across multiple dimensions and generate an interpretable evaluation report.
+Large Language Models (LLMs) such as **Gemini, ChatGPT, Claude, and Llama** are capable of generating fluent and context-aware responses. However, these responses may still suffer from issues such as:
+
+- Hallucinated information
+- Factual inaccuracies
+- Irrelevant content
+- Unsupported claims
+- Incomplete answers
+
+Evaluating these responses manually is subjective, time-consuming, and difficult to scale.
+
+The **AI Response Quality Evaluator** addresses this challenge by providing an automated evaluation framework that analyzes AI-generated responses across multiple quality dimensions using specialized evaluation agents.
+
+Instead of relying on a single evaluator, the system adopts a **multi-agent architecture** where each agent focuses on a specific aspect of response quality. The evaluation process is further strengthened through **Retrieval-Augmented Generation (RAG)**, allowing the judges to compare responses against relevant reference knowledge before producing their assessments.
+
+To ensure objective validation, the framework also supports **benchmark-based evaluation** using datasets such as **TruthfulQA**, enabling systematic testing of the evaluator itself.
 
 ---
 
-## Objectives
+# ✨ Key Features
 
-- Design a modular AI response evaluation system.
-- Evaluate AI-generated responses across multiple quality dimensions.
-- Detect hallucinated or unsupported information.
-- Support Retrieval-Augmented Generation (RAG) based evaluation.
-- Generate interpretable evaluation scores and a final quality verdict.
+## 🌐 Web Application
+
+- Modern Flask-based web interface
+- User-friendly evaluation workspace
+- Interactive evaluation dashboard
+- Responsive design
 
 ---
 
-## Key Features
-### Current Features
+## 🤖 Multi-Agent Evaluation
 
-- Research and design documentation
-- Evaluation Input Module
-- Flask-based User Interface
-- Reference Knowledge Base
+The system evaluates AI responses using three specialized judge agents:
+
+- ✅ Relevance Judge
+- ✅ Accuracy Judge
+- ✅ Hallucination Judge
+
+Each judge independently analyzes the response and produces:
+
+- Numerical score
+- Natural language explanation
+- Supporting reasoning
+
+These individual evaluations are combined into a final overall score.
+
+---
+
+## 📚 Retrieval-Augmented Generation (RAG)
+
+The evaluation pipeline incorporates Retrieval-Augmented Generation by:
+
+- Maintaining a reference knowledge base
+- Retrieving relevant context
+- Grounding evaluations with supporting information
+- Reducing unsupported judgments
+
+---
+
+## 📊 Benchmark Validation Framework
+
+Beyond manual evaluation, the project includes an automated validation framework capable of evaluating the evaluator itself using benchmark datasets.
+
+Current capabilities include:
+
+- Benchmark Dataset Validation
+- TruthfulQA Integration
+- Sequential Sampling
+- Random Sampling
+- Full Dataset Evaluation
+- Automatic Report Generation
+
+---
+
+## 🧩 Modular Architecture
+
+The project is organized into independent modules for:
+
+- Frontend
+- Backend
+- Evaluation Agents
 - Knowledge Retrieval
-- Modular project architecture
+- Validation Framework
+- Documentation
 
-### Planned Features
+This modular design allows new evaluation agents and benchmark datasets to be integrated with minimal changes.
 
-- Multi-Agent Evaluation Pipeline
-- Accuracy Evaluation
-- Relevance Evaluation
-- Completeness Evaluation
-- Hallucination Detection
-- Final Quality Verdict
-- Interactive Dashboard
 ---
 
-## High-Level Architecture
+# 📸 Application Preview
+
+## Homepage
+
+The landing page provides an overview of the evaluation framework and serves as the entry point for submitting AI responses.
+
+<p align="center">
+    <img src="src/static/images/homepage-ui.png" alt="Homepage" width="100%">
+</p>
+
+---
+
+## Evaluation Dashboard
+
+The dashboard presents the evaluation results generated by the specialized AI judges, including individual scores, explanations, and the overall response quality assessment.
+
+<p align="center">
+    <img src="src/static/images/evaluation-dashboard.png" alt="Evaluation Dashboard" width="100%">
+</p>
+
+---
+
+# 📚 Documentation
+
+Detailed documentation is available inside the **docs/** directory.
+
+| Document | Description |
+|----------|-------------|
+| `docs/RESEARCH.md` | Research on LLM evaluation techniques, RAG, hallucination detection, and benchmark datasets. |
+| `docs/SYSTEM_DESIGN.md` | Overall system architecture and component interactions. |
+| `docs/AGENTS.md` | Responsibilities and workflow of each evaluation agent. |
+| `docs/DATA_MODELS.md` | Data structures and information flow used throughout the project. |
+| `docs/TECH_STACK.md` | Technologies, libraries, and frameworks used. |
+| `docs/PROJECT_PLAN.md` | Project planning, milestones, and development roadmap. |
+
+---
+
+# 🛠 Technology Stack
+
+| Category | Technology |
+|-----------|------------|
+| Programming Language | Python |
+| Backend Framework | Flask |
+| Frontend | HTML, CSS, JavaScript |
+| LLM | Google Gemini |
+| Retrieval | Retrieval-Augmented Generation (RAG) |
+| Embeddings | Sentence Transformers |
+| Vector Store | FAISS |
+| Knowledge Base | JSON |
+| Benchmark Dataset | TruthfulQA |
+| Version Control | Git & GitHub |
+
+---
+
+# 🏗 System Architecture
+
+The AI Response Quality Evaluator follows a layered architecture that separates user interaction, application logic, AI evaluation, and data management into independent layers. This modular design improves maintainability, scalability, and allows individual components to evolve independently.
+
+<p align="center">
+    <img src="src/static/images/architecture-diagram.svg"
+         alt="AI Response Quality Evaluator System Architecture"
+         width="85%">
+</p>
+
+The architecture consists of four logical layers:
+
+| Layer | Responsibility |
+|--------|----------------|
+| **Presentation Layer** | Provides the Flask-based web interface for user interaction and response submission. |
+| **Application Layer** | Coordinates the evaluation workflow, validation framework, and report generation. |
+| **Intelligence Layer** | Performs Retrieval-Augmented Generation (RAG), interacts with Gemini, and executes the specialized evaluation agents. |
+| **Data Layer** | Manages the knowledge base, benchmark datasets, and generated validation reports. |
+
+
+---
+
+# 🔄 Response Evaluation Workflow
 
 ```text
-                User Input
-                     │
-                     ▼
-        Evaluation Input Module
-                     │
-                     ▼
-   Reference Knowledge Base (RAG)
-                     │
-                     ▼
-      Multi-Agent Evaluation Pipeline
-      ├── Accuracy Agent
-      ├── Relevance Agent
-      ├── Completeness Agent
-      ├── Hallucination Agent
-      └── Verdict Agent
-                     │
-                     ▼
-          Evaluation Report
+                           User Input
+                                │
+                                ▼
+                    Evaluation Input Module
+                                │
+                                ▼
+              Retrieval-Augmented Generation (RAG)
+                                │
+                                ▼
+                     Reference Knowledge Base
+                                │
+                                ▼
+                  AI Response Evaluation Pipeline
+                                │
+        ┌───────────────────────┼────────────────────────┐
+        │                       │                        │
+        ▼                       ▼                        ▼
+ Relevance Judge         Accuracy Judge       Hallucination Judge
+        │                       │                        │
+        └───────────────┬───────┴───────────────┬────────┘
+                        ▼                       ▼
+                 Individual Evaluation Results
+                                │
+                                ▼
+                     Overall Response Quality
+                                │
+                                ▼
+                  Interactive Evaluation Dashboard
 ```
 
 ---
 
-## Repository Structure
+# 📂 Repository Structure
 
 ```text
 AI-Response-Quality-Evaluator/
 │
-├── backend/
-│   ├── retrieval.py
-│   └── README.md
-│
-├── docs/
-│   ├── RESEARCH.md
-│   ├── SYSTEM_DESIGN.md
-│   ├── TECH_STACK.md
+├── docs/                          # Project documentation
 │   ├── AGENTS.md
 │   ├── DATA_MODELS.md
-│   └── PROJECT_PLAN.md
+│   ├── PROJECT_PLAN.md
+│   ├── RESEARCH.md
+│   ├── SYSTEM_DESIGN.md
+│   └── TECH_STACK.md
 │
-├── prototype/
-│   ├── README.md
-│   └── screenshots/
-│       ├── input_ui.png
-│       ├── retrieval_ui.png
-│       └── evaluation_summary.png
+├── prototype/                     # Milestone 1 prototype
+│   ├── backend/
+│   ├── screenshots/
+│   ├── templates/
+│   ├── app.py
+│   └── README.md
 │
-├── templates/
-│   └── index.html
+├── src/
+│   ├── agents/
+│   │   ├── relevance_agent.py
+│   │   ├── accuracy_agent.py
+│   │   └── hallucination_agent.py
+│   │
+│   ├── backend/
+│   │   ├── evaluator.py
+│   │   ├── retrieval.py
+│   │   ├── llm.py
+│   │   └── utils.py
+│   │
+│   ├── knowledge_base/
+│   │   └── knowledge_base.json
+│   │
+│   ├── static/
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── images/
+│   │
+│   ├── templates/
+│   │   └── index.html
+│   │
+│   ├── validation/
+│   │   ├── datasets/
+│   │   │   ├── raw/
+│   │   │   ├── benchmark_data.json
+│   │   │   ├── truthfulqa.json
+│   │   │   └── state.json
+│   │   │
+│   │   ├── reports/
+│   │   │   ├── benchmark_sample_report.txt
+│   │   │   ├── truthfulqa_sample_report.txt
+│   │   │   └── README.md
+│   │   │
+│   │   ├── convert_truthfulqa.py
+│   │   ├── dataset_loader.py
+│   │   ├── report.py
+│   │   └── validator.py
+│   │
+│   ├── app.py
+│   └── __init__.py
 │
-├── app.py
-├── README.md
-├── requirements.txt
+├── .gitignore
 ├── LICENSE
-└── .gitignore
+├── README.md
+└── requirements.txt
 ```
 
 ---
 
-## Milestone 1 Prototype
+# ⚙️ Installation
 
-A working Flask-based prototype has been developed for Milestone 1.
+Clone the repository:
 
-Current implementation includes:
+```bash
+git clone https://github.com/abhinavgoel2005/AI-Response-Quality-Evaluator.git
+```
 
-- User Question Submission
-- AI Response Submission
-- Optional Reference Answer
-- Reference Knowledge Retrieval
-- Evaluation Summary
+Move into the project directory:
 
-Future milestones will extend this prototype with automated multi-agent response evaluation.
+```bash
+cd AI-Response-Quality-Evaluator
+```
 
----
+Install all required dependencies:
 
-## Technology Stack
-
-| Category | Technology |
-|----------|------------|
-| Language | Python |
-| Backend | Flask |
-| AI Framework | LangChain |
-| Embeddings | Sentence Transformers |
-| Vector Database | FAISS |
-| Datasets | TruthfulQA, SQuAD |
-| Evaluation Frameworks | RAGAS, TruLens |
-| Version Control | Git & GitHub |
-
-> A detailed explanation of the technology choices is available in **docs/TECH_STACK.md**.
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## Future Work
+# 🔑 Environment Variables
 
-The upcoming milestones will focus on:
+Create a `.env` file inside the **src/** directory.
 
-- Multi-Agent Evaluation Pipeline
-- LLM-based Response Scoring
-- RAG Integration
-- Hallucination Detection
-- Dashboard and Analytics
-- Batch Evaluation Support
+Example:
+
+```env
+GOOGLE_API_KEY=YOUR_GEMINI_API_KEY
+```
+
+The project uses **Google Gemini** for response generation and LLM-based evaluation.
 
 ---
 
-## Author
+# 🚀 Running the Web Application
+
+Move into the source directory:
+
+```bash
+cd src
+```
+
+Start the Flask application:
+
+```bash
+python app.py
+```
+
+Open your browser and visit:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
+
+# 💡 Using the Web Interface
+
+The web application allows users to evaluate AI-generated responses interactively.
+
+### Step 1
+
+Enter a **User Question**.
+
+### Step 2
+
+Paste the **AI Generated Response**.
+
+### Step 3
+
+(Optional) Provide a **Reference Answer**.
+
+### Step 4
+
+Click **Evaluate**.
+
+The system will display:
+
+- Relevance Score
+- Accuracy Score
+- Hallucination Score
+- Overall Evaluation
+- Detailed reasoning from each judge
+
+---
+
+# 🧪 Benchmark Validation Framework
+
+The project includes an automated validation framework for evaluating the evaluator using benchmark datasets.
+
+Current supported datasets include:
+
+- Benchmark Dataset
+- TruthfulQA
+
+Move into the source directory:
+
+```bash
+cd src
+```
+
+Run the validator:
+
+```bash
+python -m validation.validator
+```
+
+The validator automatically:
+
+- Loads benchmark samples
+- Generates responses (if required)
+- Runs all evaluation agents
+- Computes the overall score
+- Generates a detailed validation report
+
+---
+
+# 📄 Validation Reports
+
+Generated reports are stored in:
+
+```text
+src/validation/reports/
+```
+
+Example reports included in the repository:
+
+- benchmark_sample_report.txt
+- truthfulqa_sample_report.txt
+
+These reports demonstrate the output produced by the validation framework.
+
+---
+
+# 🎯 Evaluation Pipeline
+
+The validation workflow follows the sequence below:
+
+```text
+Dataset
+     │
+     ▼
+Dataset Loader
+     │
+     ▼
+Sampling Strategy
+     │
+     ▼
+Response Generation (Gemini)
+     │
+     ▼
+Multi-Agent Evaluation
+     │
+     ├── Relevance Judge
+     ├── Accuracy Judge
+     └── Hallucination Judge
+     │
+     ▼
+Overall Score
+     │
+     ▼
+Validation Report
+```
+
+---
+
+# 🛣 Roadmap
+
+The project is being developed incrementally with a focus on building a reliable and explainable AI response evaluation framework.
+
+## Completed
+
+- [x] Flask-based Web Interface
+- [x] Multi-Agent Evaluation Pipeline
+- [x] Relevance Evaluation Agent
+- [x] Accuracy Evaluation Agent
+- [x] Hallucination Detection Agent
+- [x] Retrieval-Augmented Generation (RAG)
+- [x] Knowledge Base Integration
+- [x] TruthfulQA Benchmark Integration
+- [x] Automated Validation Framework
+- [x] Sequential & Random Dataset Sampling
+- [x] Automated Validation Report Generation
+
+---
+
+## Planned Enhancements
+
+- [ ] Batch Evaluation Support
+- [ ] Interactive Analytics Dashboard
+- [ ] PDF Report Export
+- [ ] Additional Benchmark Dataset Support
+- [ ] Gemini SDK Migration (`google-genai`)
+- [ ] REST API Endpoints
+- [ ] Docker Deployment
+- [ ] CI/CD Integration using GitHub Actions
+
+---
+
+# 📜 License
+
+This project is licensed under the **MIT License**.
+
+See the [LICENSE](LICENSE) file for complete details.
+
+---
+
+# 🙏 Acknowledgements
+
+This project builds upon ideas, tools, and datasets provided by the open-source community.
+
+Special thanks to:
+
+- Google Gemini
+- Flask
+- LangChain
+- FAISS
+- Sentence Transformers
+- TruthfulQA Benchmark
+- Hugging Face
+- RAGAS
+- TruLens
+
+---
+
+# 👨‍💻 Author
 
 **Abhinav Goel**
 
-B.Tech (Artificial Intelligence & Machine Learning)
+B.Tech – Artificial Intelligence & Machine Learning
+
+Guru Gobind Singh Indraprastha University (GGSIPU)
 
 Infosys Springboard Internship Project – 2026
+
+GitHub:
+https://github.com/abhinavgoel2005
+
+LinkedIn:
+https://www.linkedin.com/in/abhinav-pradeep-goel10
+
+---
+
+# ⭐ If you found this project useful...
+
+If you found this repository helpful or interesting, consider giving it a ⭐ on GitHub.
+
+It helps support the project and encourages future development.

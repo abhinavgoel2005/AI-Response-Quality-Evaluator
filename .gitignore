@@ -230,3 +230,14 @@ venv/
 
 # VS Code
 .vscode/
+
+# Ignore generated validation reports
+src/validation/reports/*.txt
+
+# Keep sample reports
+!src/validation/reports/benchmark_sample_report.txt
+!src/validation/reports/truthfulqa_sample_report.txt
+
+# Keep documentation
+!src/validation/reports/README.md
+!src/validation/reports/.gitkeep
