@@ -467,14 +467,14 @@ button:hover{
 
 .agent-card p{
 
-    color:#334155;
+    text-align:left;
 
-    line-height:1.7;
+    line-height:1.8;
 
-    font-size:15px;
+    color:#4B5563;
 
+    overflow-wrap:anywhere;
 }
-
 
 /* ==========================================
    LEFT COLORED BORDER
