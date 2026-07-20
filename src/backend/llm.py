@@ -41,3 +41,4 @@ def generate_response(prompt: str):
     except Exception as e:
 
         return f"ERROR: {str(e)}"
+        

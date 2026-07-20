@@ -12,7 +12,16 @@ def parse_json_response(response_text, default_key):
 
     except Exception:
 
-        return {
+        result = {
             "score": 0,
-            default_key: response_text
+            default_key: (
+                "Evaluation could not be completed because the AI service "
+                "was unavailable."
+            ),
+            "_error": response_text
         }
+
+        if default_key == "reason":
+            result.setdefault("unsupported_claims", [])
+
+        return result
