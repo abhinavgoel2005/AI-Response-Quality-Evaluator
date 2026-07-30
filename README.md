@@ -48,30 +48,63 @@ To ensure objective validation, the framework also supports **benchmark-based ev
 
 ## 🤖 Multi-Agent Evaluation
 
-The system evaluates AI responses using three specialized judge agents:
+The system evaluates AI responses using specialized judge agents, with each agent focusing on a distinct quality dimension:
 
 - ✅ Relevance Judge
 - ✅ Accuracy Judge
 - ✅ Hallucination Judge
+- ✅ Completeness Judge
+- ✅ Verdict Agent
 
-Each judge independently analyzes the response and produces:
+### Relevance Judge
 
-- Numerical score
-- Natural language explanation
-- Supporting reasoning
+Evaluates how well the AI-generated response addresses the user's question and assigns a relevance score with reasoning.
 
-These individual evaluations are combined into a final overall score.
+### Accuracy Judge
+
+Evaluates factual correctness using the optional reference answer and sufficiently relevant evidence retrieved through the RAG pipeline.
+
+If reliable grounding evidence is unavailable, the dimension is marked as **unverifiable (N/A)** instead of assigning an unsupported score.
+
+### Hallucination Judge
+
+Identifies claims that are unsupported or contradicted by the available reference information or RAG-retrieved evidence.
+
+When sufficient grounding evidence is unavailable, hallucination verification is reported as **N/A**.
+
+### Completeness Judge
+
+Determines whether the response addresses all aspects requested by the user and identifies specific omissions.
+
+### Verdict Agent
+
+Aggregates the individual evaluation dimensions using a weighted scoring model and quality gates to produce:
+
+- Overall Score
+- Final Verdict — Pass / Needs Improvement / Fail
+- Consolidated Evaluation Summary
+- Quality Gate Findings
+
+This multi-agent design keeps individual quality dimensions independently explainable while producing a unified final assessment.
 
 ---
 
 ## 📚 Retrieval-Augmented Generation (RAG)
 
-The evaluation pipeline incorporates Retrieval-Augmented Generation by:
+The evaluation framework includes a Retrieval-Augmented Generation pipeline for grounding factual evaluations in external knowledge.
 
-- Maintaining a reference knowledge base
-- Retrieving relevant context
-- Grounding evaluations with supporting information
-- Reducing unsupported judgments
+The RAG pipeline:
+
+1. Loads documents from the project knowledge base.
+2. Generates semantic embeddings using Sentence Transformers.
+3. Stores and searches embeddings using FAISS.
+4. Retrieves the most relevant documents for the submitted question.
+5. Applies a similarity threshold to reject weak or unrelated evidence.
+6. Supplies sufficiently relevant evidence to the Accuracy and Hallucination judges.
+
+If neither a reference answer nor sufficiently relevant retrieved evidence is available, evidence-dependent dimensions are marked as **unverifiable (N/A)** rather than generating unsupported factual judgments.
+
+This prevents unrelated retrieved documents from being treated as evidence.
 
 ---
 
@@ -87,6 +120,40 @@ Current capabilities include:
 - Random Sampling
 - Full Dataset Evaluation
 - Automatic Report Generation
+
+---
+
+## 📁 Batch Evaluation
+
+The Batch Evaluation Module enables automatic evaluation of multiple question-response pairs from a CSV file.
+
+Supported CSV columns:
+
+- `question` — required
+- `response` — required
+- `reference` — optional
+
+Each valid row is processed through the existing multi-agent evaluation pipeline.
+
+Batch evaluation provides:
+
+- Total row count
+- Successful evaluations
+- Partial evaluations
+- Failed evaluations
+- Average quality score
+- Verdict distribution
+- Individual evaluation results for each row
+
+Rows are classified as:
+
+- **Success** — evaluation completed without agent failures.
+- **Partial** — evaluation completed, but one or more agents encountered an execution error.
+- **Error** — the row could not be reliably evaluated.
+
+An **unverifiable (N/A)** dimension is not considered an execution failure. It indicates that sufficient grounding evidence was unavailable.
+
+Only fully successful rows contribute to aggregate score and verdict statistics.
 
 ---
 
@@ -107,22 +174,92 @@ This modular design allows new evaluation agents and benchmark datasets to be in
 
 # 📸 Application Preview
 
-## Homepage
+The web application provides an interactive interface for submitting AI-generated responses and examining their quality across multiple evaluation dimensions.
 
-The landing page provides an overview of the evaluation framework and serves as the entry point for submitting AI responses.
+---
+
+## 🏠 Homepage
+
+The homepage introduces the AI Response Quality Evaluator and highlights the multi-agent evaluation framework powered by Retrieval-Augmented Generation (RAG) and Large Language Models.
 
 <p align="center">
-    <img src="src/static/images/homepage-ui.png" alt="Homepage" width="100%">
+    <img src="src/static/images/homepage-ui.png"
+         alt="AI Response Quality Evaluator Homepage"
+         width="90%">
 </p>
 
 ---
 
-## Evaluation Dashboard
+## 📝 Input Workspace
 
-The dashboard presents the evaluation results generated by the specialized AI judges, including individual scores, explanations, and the overall response quality assessment.
+The Input Workspace allows users to submit the information required for evaluation:
+
+- **User Question** — the original question or prompt.
+- **AI Generated Response** — the response to be evaluated.
+- **Reference Answer (Optional)** — additional grounding information when available.
+
+If no reference answer is supplied, the system can use the RAG pipeline to retrieve relevant evidence from the knowledge base.
 
 <p align="center">
-    <img src="src/static/images/evaluation-dashboard.png" alt="Evaluation Dashboard" width="100%">
+    <img src="src/static/images/input-workspace.png"
+         alt="AI Response Evaluation Input Workspace"
+         width="90%">
+</p>
+
+---
+
+## 🤖 Per-Dimension Evaluation Dashboard
+
+After submission, the response is independently evaluated by four specialized judge agents.
+
+The dashboard displays:
+
+- **Relevance Judge** — evaluates how directly the response addresses the question.
+- **Accuracy Judge** — evaluates factual correctness against available grounding evidence.
+- **Hallucination Judge** — detects unsupported or contradictory claims.
+- **Completeness Judge** — determines whether all requested aspects of the question were addressed.
+
+Each dimension provides its score together with supporting reasoning, evidence, omissions, or unsupported claims where applicable.
+
+Evidence-dependent dimensions may display **N/A** when sufficient reference or retrieved evidence is unavailable.
+
+<p align="center">
+    <img src="src/static/images/evaluation-dashboard.png"
+         alt="Per-Dimension Evaluation Dashboard"
+         width="90%">
+</p>
+
+---
+
+## ⚖️ Overall Verdict
+
+The Verdict Agent combines the individual evaluation dimensions using a weighted scoring model and applies quality gates before producing the final quality assessment.
+
+The verdict interface presents:
+
+- **Overall Weighted Score**
+- **Final Verdict** — Pass, Needs Improvement, or Fail
+- **Verdict Summary**
+- **Quality Gate Findings**
+
+The Verdict Summary provides a concise interpretation of the evaluation instead of repeating the detailed reasoning already presented by the individual judge agents.
+
+<p align="center">
+    <img src="src/static/images/overall-verdict.png"
+         alt="Overall Quality Verdict"
+         width="90%">
+</p>
+
+---
+
+## Batch Evaluation
+
+The Batch Evaluation interface enables users to evaluate multiple AI-generated responses from a CSV dataset in a single workflow.
+
+The uploaded CSV must contain the required `question` and `response` columns, while the `reference` column is optional. Each valid row is processed through the multi-agent evaluation pipeline to generate quality scores and verdicts.
+
+<p align="center">
+    <img src="src/static/images/batch-evaluation-ui.png" alt="Batch Evaluation Interface" width="100%">
 </p>
 
 ---
@@ -185,33 +322,45 @@ The architecture consists of four logical layers:
 
 ```text
                            User Input
-                                │
-                                ▼
+                               │
+                               ▼
                     Evaluation Input Module
-                                │
-                                ▼
-              Retrieval-Augmented Generation (RAG)
-                                │
-                                ▼
-                     Reference Knowledge Base
-                                │
-                                ▼
-                  AI Response Evaluation Pipeline
-                                │
-        ┌───────────────────────┼────────────────────────┐
-        │                       │                        │
-        ▼                       ▼                        ▼
- Relevance Judge         Accuracy Judge       Hallucination Judge
-        │                       │                        │
-        └───────────────┬───────┴───────────────┬────────┘
-                        ▼                       ▼
-                 Individual Evaluation Results
-                                │
-                                ▼
-                     Overall Response Quality
-                                │
-                                ▼
-                  Interactive Evaluation Dashboard
+                               │
+                ┌──────────────┴──────────────┐
+                │                             │
+                ▼                             ▼
+        Single Evaluation              Batch Evaluation
+                │                             │
+                └──────────────┬──────────────┘
+                               ▼
+                         RAG Retrieval
+                               │
+                               ▼
+                    Reference Knowledge Base
+                               │
+                               ▼
+                   Multi-Agent Evaluation
+                               │
+          ┌────────────┬────────────┬────────────┐
+          ▼            ▼            ▼            ▼
+     Relevance      Accuracy   Hallucination  Completeness
+       Judge          Judge        Judge          Judge
+          │            │            │            │
+          └────────────┴──────┬─────┴────────────┘
+                              ▼
+                        Verdict Agent
+                              │
+                              ▼
+                    Weighted Quality Score
+                              │
+                              ▼
+                         Quality Gates
+                              │
+                              ▼
+                 Pass / Needs Improvement / Fail
+                              │
+                              ▼
+                    Evaluation Dashboard
 ```
 
 ---
@@ -240,10 +389,13 @@ AI-Response-Quality-Evaluator/
 │   ├── agents/
 │   │   ├── relevance_agent.py
 │   │   ├── accuracy_agent.py
-│   │   └── hallucination_agent.py
+│   │   ├── hallucination_agent.py
+│   │   ├── completeness_agent.py
+│   │   └── verdict_agent.py
 │   │
 │   ├── backend/
 │   │   ├── evaluator.py
+│   │   ├── batch_evaluator.py
 │   │   ├── retrieval.py
 │   │   ├── llm.py
 │   │   └── utils.py
@@ -253,7 +405,9 @@ AI-Response-Quality-Evaluator/
 │   │
 │   ├── static/
 │   │   ├── css/
+│   │   │   └──style.css
 │   │   ├── js/
+│   │   │   └──app.js
 │   │   └── images/
 │   │
 │   ├── templates/
@@ -365,13 +519,17 @@ Paste the **AI Generated Response**.
 
 Click **Evaluate**.
 
-The system will display:
+The system displays:
 
-- Relevance Score
-- Accuracy Score
-- Hallucination Score
-- Overall Evaluation
-- Detailed reasoning from each judge
+- Relevance Score and Reasoning
+- Accuracy Score and Supporting Evidence
+- Hallucination Grounding Score
+- Unsupported Claims
+- Completeness Score and Omissions
+- Overall Weighted Score
+- Final Verdict
+- Verdict Agent Summary
+- Quality Gate Findings
 
 ---
 
@@ -444,10 +602,17 @@ Multi-Agent Evaluation
      │
      ├── Relevance Judge
      ├── Accuracy Judge
-     └── Hallucination Judge
+     ├── Hallucination Judge
+     └── Completeness Judge
      │
      ▼
-Overall Score
+Verdict Agent
+     │
+     ▼
+Weighted Overall Score
+     │
+     ▼
+Quality Gates
      │
      ▼
 Validation Report
@@ -466,18 +631,28 @@ The project is being developed incrementally with a focus on building a reliable
 - [x] Relevance Evaluation Agent
 - [x] Accuracy Evaluation Agent
 - [x] Hallucination Detection Agent
+- [x] Completeness Evaluation Agent
+- [x] Verdict Agent
+- [x] Weighted Scoring Model
+- [x] Quality Gate System
+- [x] Per-Dimension Evaluation Interface
+- [x] Verdict Summary Interface
 - [x] Retrieval-Augmented Generation (RAG)
+- [x] Semantic Retrieval with Sentence Transformers
+- [x] FAISS Vector Search
 - [x] Knowledge Base Integration
+- [x] Evidence Relevance Filtering
+- [x] Unverifiable/N/A Handling
 - [x] TruthfulQA Benchmark Integration
 - [x] Automated Validation Framework
 - [x] Sequential & Random Dataset Sampling
 - [x] Automated Validation Report Generation
+- [x] Batch Evaluation Module
 
 ---
 
 ## Planned Enhancements
 
-- [ ] Batch Evaluation Support
 - [ ] Interactive Analytics Dashboard
 - [ ] PDF Report Export
 - [ ] Additional Benchmark Dataset Support
