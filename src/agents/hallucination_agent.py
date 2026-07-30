@@ -4,74 +4,150 @@ from backend.utils import parse_json_response
 
 class HallucinationJudge:
 
-    def evaluate(self, response, reference="", retrieved_chunks=None):
+    def evaluate(
+        self,
+        response,
+        reference="",
+        retrieved_chunks=None
+    ):
 
         retrieved_chunks = retrieved_chunks or []
 
+        # -----------------------------
+        # Prepare Evidence
+        # -----------------------------
+
         rag_evidence = "\n\n".join(
-            f"Source {i + 1} - {chunk['title']}:\n{chunk['content']}"
+            f"Source {i + 1} - {chunk['title']}:\n"
+            f"{chunk['content']}"
             for i, chunk in enumerate(retrieved_chunks)
         )
 
-        if not rag_evidence:
-            rag_evidence = "No retrieved evidence available."
+        has_reference = bool(
+            reference and reference.strip()
+        )
 
-        if not reference or not reference.strip():
-            reference = "No reference answer provided."
+        has_rag_evidence = bool(
+            rag_evidence.strip()
+        )
+
+        # -----------------------------
+        # No Grounding Available
+        # -----------------------------
+
+        if not has_reference and not has_rag_evidence:
+
+            return {
+                "score": None,
+                "unsupported_claims": [],
+                "reason":
+                    "No reference answer or sufficiently relevant "
+                    "retrieved evidence was available to determine "
+                    "whether the response contains unsupported claims."
+            }
+
+        reference_text = (
+            reference.strip()
+            if has_reference
+            else "Not provided."
+        )
+
+        rag_text = (
+            rag_evidence
+            if has_rag_evidence
+            else "Not available."
+        )
+
+        # -----------------------------
+        # Prompt
+        # -----------------------------
 
         prompt = f"""
-You are an expert evaluator of AI-generated responses.
+You are a factual grounding evaluator.
 
-Your task is to detect hallucinations.
+Determine whether factual claims in the AI Response are supported by
+the Grounding Evidence.
 
 AI Response:
 {response}
 
+Grounding Evidence:
+
 Reference Answer:
-{reference}
+{reference_text}
 
 Retrieved Evidence:
-{rag_evidence}
+{rag_text}
 
-Analyze the factual claims in the AI response.
+IMPORTANT DEFINITION:
 
-A claim should be considered unsupported if:
-- It contradicts the reference answer or retrieved evidence.
-- It makes a factual assertion that cannot be supported by the available evidence.
+A hallucination is a factual claim whose MEANING is contradicted by
+the grounding evidence or cannot be supported by the grounding evidence.
 
-Do NOT flag a claim merely because it is worded differently from the evidence.
+Compare MEANING, not wording.
 
-When a reference answer is provided, use it as important evidence.
-Use the retrieved evidence as additional grounding.
+The following MUST NOT be considered hallucinations:
 
-If no reference answer is provided, use the retrieved evidence as the
-primary source for hallucination detection.
+- paraphrases
+- synonymous wording
+- grammatical differences
+- shorter or longer phrasing
+- standard abbreviations
+- standard acronyms
 
-Return ONLY valid JSON in the following format:
+For example:
+
+"RAG combines information retrieval with generative language models."
+
+and
+
+"Retrieval-Augmented Generation combines information retrieval with
+generative language models."
+
+express the SAME factual claim.
+
+Therefore the first statement MUST NOT be marked unsupported when the
+second statement is supported by the evidence.
+
+Do not evaluate whether the response is detailed enough.
+Do not evaluate completeness.
+Do not evaluate relevance.
+Do not penalize wording differences.
+
+For each factual claim, ask only:
+
+"Does the available evidence support the factual meaning of this claim?"
+
+If YES:
+The claim is supported.
+
+If NO:
+The claim is unsupported.
+
+Return ONLY valid JSON:
 
 {{
-    "score": number,
     "unsupported_claims": [
-        "claim 1",
-        "claim 2"
+        "exact unsupported claim"
     ],
-    "reason": "Short explanation"
+    "reason": "Brief explanation based only on factual grounding."
 }}
 
-Rules:
+If every factual claim is supported:
 
-- Score must be between 1 and 10.
-- A higher score means the response is better grounded and contains fewer hallucinations.
-- A lower score means the response contains significant unsupported or contradictory claims.
-- If every factual claim is supported, return:
-  "unsupported_claims": []
-- Include the specific unsupported statement whenever possible.
-- Evaluate ONLY hallucinations.
-- Do NOT evaluate relevance or completeness.
-- Do NOT write markdown.
-- Do NOT use ```json.
-- Return ONLY JSON.
+{{
+    "unsupported_claims": [],
+    "reason": "All factual claims are supported by the available grounding evidence."
+}}
+
+Do not return a score.
+Do not use markdown.
+Do not use JSON code fences.
 """
+
+        # -----------------------------
+        # Generate Evaluation
+        # -----------------------------
 
         result = generate_response(prompt)
 
@@ -80,7 +156,45 @@ Rules:
             "reason"
         )
 
-        parsed.setdefault("unsupported_claims", [])
-        parsed.setdefault("reason", "")
+        unsupported_claims = parsed.get(
+            "unsupported_claims",
+            []
+        )
 
-        return parsed
+        if not isinstance(unsupported_claims, list):
+            unsupported_claims = []
+
+        reason = parsed.get(
+            "reason",
+            ""
+        )
+
+        # -----------------------------
+        # Deterministic Score
+        # -----------------------------
+
+        if not unsupported_claims:
+
+            score = 10
+
+        elif len(unsupported_claims) == 1:
+
+            score = 7
+
+        elif len(unsupported_claims) == 2:
+
+            score = 4
+
+        else:
+
+            score = 2
+
+        # -----------------------------
+        # Final Result
+        # -----------------------------
+
+        return {
+            "score": score,
+            "unsupported_claims": unsupported_claims,
+            "reason": reason
+        }

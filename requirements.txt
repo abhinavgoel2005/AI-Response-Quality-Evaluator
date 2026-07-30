@@ -22,3 +22,6 @@ trulens
 # Utilities
 python-dotenv
 requests
+
+# Dependency
+groq

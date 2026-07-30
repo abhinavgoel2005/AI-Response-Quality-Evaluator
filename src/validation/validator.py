@@ -30,10 +30,10 @@ def evaluate_sample(evaluator, sample):
 
         response = sample["response"]
 
-    # Otherwise generate a new response using Gemini
+    # Otherwise generate a new response using Groq
     else:
 
-        print("Generating response from Gemini...")
+        print("Generating response from Groq...")
 
         response = generate_response(
             sample["question"]

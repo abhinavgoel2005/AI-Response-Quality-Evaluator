@@ -6,7 +6,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Flask](https://img.shields.io/badge/Flask-Web_App-black)
-![Gemini](https://img.shields.io/badge/Google-Gemini-blue)
+![Groq](https://img.shields.io/badge/Groq-Llama_3.1_8B-orange)
 ![RAG](https://img.shields.io/badge/RAG-Enabled-green)
 ![TruthfulQA](https://img.shields.io/badge/Benchmark-TruthfulQA-orange)
 ![License](https://img.shields.io/badge/License-MIT-success)
@@ -17,7 +17,7 @@
 
 # 📖 Project Overview
 
-Large Language Models (LLMs) such as **Gemini, ChatGPT, Claude, and Llama** are capable of generating fluent and context-aware responses. However, these responses may still suffer from issues such as:
+Large Language Models (LLMs) such as **Groq, ChatGPT, Claude, and Llama** are capable of generating fluent and context-aware responses. However, these responses may still suffer from issues such as:
 
 - Hallucinated information
 - Factual inaccuracies
@@ -264,6 +264,27 @@ The uploaded CSV must contain the required `question` and `response` columns, wh
 
 ---
 
+## Batch Evaluation Results
+
+After processing the uploaded CSV dataset, the system presents an aggregate summary along with the evaluation outcome for each response.
+
+The batch results dashboard includes:
+
+- Total, successful, partial, failed, and aggregated evaluation counts
+- Average quality score across successfully evaluated responses
+- Final verdict distribution across **Pass**, **Needs Improvement**, and **Fail**
+- Individual scores for Relevance, Accuracy, Hallucination, and Completeness
+- Overall quality score and final verdict for every evaluated response
+- Expandable detailed evaluation results for individual submissions
+
+<p align="center">
+    <img src="src/static/images/batch-evaluation-results.png"
+         alt="Batch Evaluation Results"
+         width="100%">
+</p>
+
+---
+
 # 📚 Documentation
 
 Detailed documentation is available inside the **docs/** directory.
@@ -279,20 +300,19 @@ Detailed documentation is available inside the **docs/** directory.
 
 ---
 
-# 🛠 Technology Stack
+# Technology Stack
 
-| Category | Technology |
-|-----------|------------|
-| Programming Language | Python |
-| Backend Framework | Flask |
-| Frontend | HTML, CSS, JavaScript |
-| LLM | Google Gemini |
+| Component | Technology |
+|---|---|
+| Backend | Python, Flask |
+| LLM Provider | Groq |
+| LLM | Llama 3.1 8B Instant |
+| Embeddings | Sentence Transformers (`all-MiniLM-L6-v2`) |
+| Vector Search | FAISS |
+| Evaluation Architecture | Multi-Agent Evaluation Framework |
 | Retrieval | Retrieval-Augmented Generation (RAG) |
-| Embeddings | Sentence Transformers |
-| Vector Store | FAISS |
-| Knowledge Base | JSON |
-| Benchmark Dataset | TruthfulQA |
-| Version Control | Git & GitHub |
+| Frontend | HTML, CSS, JavaScript |
+| Dataset Processing | Python CSV Processing |
 
 ---
 
@@ -312,7 +332,7 @@ The architecture consists of four logical layers:
 |--------|----------------|
 | **Presentation Layer** | Provides the Flask-based web interface for user interaction and response submission. |
 | **Application Layer** | Coordinates the evaluation workflow, validation framework, and report generation. |
-| **Intelligence Layer** | Performs Retrieval-Augmented Generation (RAG), interacts with Gemini, and executes the specialized evaluation agents. |
+| **Intelligence Layer** | Performs Retrieval-Augmented Generation (RAG), interacts with Groq, and executes the specialized evaluation agents. |
 | **Data Layer** | Manages the knowledge base, benchmark datasets, and generated validation reports. |
 
 
@@ -463,17 +483,15 @@ pip install -r requirements.txt
 
 ---
 
-# 🔑 Environment Variables
+# Environment Configuration
 
-Create a `.env` file inside the **src/** directory.
-
-Example:
+Create a `.env` file inside the `src/` directory:
 
 ```env
-GOOGLE_API_KEY=YOUR_GEMINI_API_KEY
+GROQ_API_KEY=your_groq_api_key
 ```
 
-The project uses **Google Gemini** for response generation and LLM-based evaluation.
+The project uses **Groq** for response generation and LLM-based evaluation.
 
 ---
 
@@ -595,7 +613,7 @@ Dataset Loader
 Sampling Strategy
      │
      ▼
-Response Generation (Gemini)
+Response Generation (Groq)
      │
      ▼
 Multi-Agent Evaluation
@@ -653,10 +671,8 @@ The project is being developed incrementally with a focus on building a reliable
 
 ## Planned Enhancements
 
-- [ ] Interactive Analytics Dashboard
 - [ ] PDF Report Export
 - [ ] Additional Benchmark Dataset Support
-- [ ] Gemini SDK Migration (`google-genai`)
 - [ ] REST API Endpoints
 - [ ] Docker Deployment
 - [ ] CI/CD Integration using GitHub Actions
@@ -677,7 +693,7 @@ This project builds upon ideas, tools, and datasets provided by the open-source 
 
 Special thanks to:
 
-- Google Gemini
+- Groq
 - Flask
 - LangChain
 - FAISS
