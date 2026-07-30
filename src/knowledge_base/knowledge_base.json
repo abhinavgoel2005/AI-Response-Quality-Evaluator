@@ -1,0 +1,32 @@
+[
+  {
+    "id": "doc_001",
+    "title": "Artificial Intelligence",
+    "content": "Artificial Intelligence (AI) is a field of computer science focused on creating systems capable of performing tasks that normally require human intelligence. These tasks include learning, reasoning, problem solving, understanding language, perception, and decision making."
+  },
+  {
+    "id": "doc_002",
+    "title": "Machine Learning",
+    "content": "Machine Learning (ML) is a subset of artificial intelligence that enables computer systems to learn patterns from data and make predictions or decisions without being explicitly programmed for every task. Common types of machine learning include supervised learning, unsupervised learning, and reinforcement learning."
+  },
+  {
+    "id": "doc_003",
+    "title": "Deep Learning",
+    "content": "Deep Learning is a subset of machine learning that uses artificial neural networks with multiple layers to learn complex patterns from data. It is commonly applied to tasks such as image recognition, natural language processing, speech recognition, and generative AI."
+  },
+  {
+    "id": "doc_004",
+    "title": "Natural Language Processing",
+    "content": "Natural Language Processing (NLP) is a field of artificial intelligence concerned with enabling computers to process, understand, and generate human language. NLP applications include machine translation, sentiment analysis, text summarization, question answering, and chatbots."
+  },
+  {
+    "id": "doc_005",
+    "title": "Retrieval-Augmented Generation",
+    "content": "Retrieval-Augmented Generation (RAG) combines information retrieval with generative language models. Before generating an answer, the system retrieves relevant information from an external knowledge source and provides that information as context to the language model. RAG can improve factual accuracy and reduce hallucinations, but it does not guarantee that hallucinations will be completely eliminated."
+  },
+  {
+    "id": "doc_006",
+    "title": "Large Language Models",
+    "content": "Large Language Models (LLMs) are machine learning models trained on large collections of text to understand and generate natural language. They can perform tasks such as question answering, summarization, translation, text generation, and reasoning, but they may sometimes generate inaccurate or unsupported information."
+  }
+]

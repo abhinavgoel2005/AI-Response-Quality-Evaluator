@@ -1,0 +1,4 @@
+question,response,reference
+"What is Retrieval-Augmented Generation?","RAG combines information retrieval with generative language models.","Retrieval-Augmented Generation combines information retrieval with generative language models."
+"What is Machine Learning?","Machine learning allows computer systems to learn patterns from data without being explicitly programmed for every task.","Machine Learning is a subset of artificial intelligence that enables systems to learn patterns from data."
+"Explain RAG and mention one limitation.","RAG retrieves external information and provides it as context to a language model.","RAG retrieves relevant external information to provide context to a language model. It can reduce hallucinations but cannot guarantee their elimination."

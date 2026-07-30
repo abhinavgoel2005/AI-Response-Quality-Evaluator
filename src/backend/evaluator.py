@@ -1,71 +1,85 @@
 from agents.relevance_agent import RelevanceJudge
 from agents.accuracy_agent import AccuracyJudge
 from agents.hallucination_agent import HallucinationJudge
+from agents.completeness_agent import CompletenessJudge
+from agents.verdict_agent import VerdictAgent
+
+from backend.retrieval import KnowledgeRetriever
 
 
 class ResponseEvaluator:
 
     def __init__(self):
 
+        # -----------------------------
+        # Initialize Evaluation Agents
+        # -----------------------------
+
         self.relevance_agent = RelevanceJudge()
         self.accuracy_agent = AccuracyJudge()
         self.hallucination_agent = HallucinationJudge()
+        self.completeness_agent = CompletenessJudge()
+        self.verdict_agent = VerdictAgent()
 
-    def evaluate(self, question, response, reference):
+        # -----------------------------
+        # Initialize RAG Retriever
+        # -----------------------------
+
+        self.retriever = KnowledgeRetriever()
+
+
+    def evaluate(self, question, response, reference=""):
 
         # -----------------------------
         # Input Validation
         # -----------------------------
 
-        question = question.strip()
-        response = response.strip()
-        reference = reference.strip()
+        question = question.strip() if question else ""
+        response = response.strip() if response else ""
+        reference = reference.strip() if reference else ""
 
         if not question:
 
-            return {
-
-                "relevance": {
-                    "score": 0,
-                    "reason": "Question cannot be empty."
-                },
-
-                "accuracy": {
-                    "score": 0,
-                    "evidence": "Question cannot be empty."
-                },
-
-                "hallucination": {
-                    "score": 0,
-                    "reason": "Question cannot be empty.",
-                    "unsupported_claims": []
-                },
-
-                "overall_score": 0
-            }
+            return self._validation_error(
+                "Question cannot be empty."
+            )
 
         if not response:
 
-            return {
+            return self._validation_error(
+                "AI response cannot be empty."
+            )
 
-                "relevance": {
-                    "score": 0,
-                    "reason": "AI response cannot be empty."
-                },
 
-                "accuracy": {
-                    "score": 0,
-                    "evidence": "AI response cannot be empty."
-                },
+        # -----------------------------
+        # RAG Retrieval
+        # -----------------------------
 
-                "hallucination": {
-                    "score": 0,
-                    "reason": "AI response cannot be empty.",
-                    "unsupported_claims": []
-                },
+        try:
 
-                "overall_score": 0
-            }
+            retrieved_chunks = self.retriever.retrieve(
+                question,
+                top_k=3
+            )
+
+        except Exception as e:
+
+            print("Retrieval Error:", e)
+
+            retrieved_chunks = []
+
+
+        # -----------------------------
+        # Determine Grounding State
+        # -----------------------------
+
+        has_reference = bool(reference)
+        has_rag_evidence = bool(retrieved_chunks)
+
+        grounding_available = (
+            has_reference or has_rag_evidence
+        )
+
 
         # -----------------------------
         # Relevance Agent
@@ -80,91 +94,249 @@ class ResponseEvaluator:
 
         except Exception as e:
 
-             print("Relevance Agent Error:", e)
+            print("Relevance Agent Error:", e)
 
-             relevance_result = {
-
-                "score":0,
-
-                "reason":"Unable to evaluate relevance at the moment."
-
-
+            relevance_result = {
+                "score": None,
+                "status": "error",
+                "reason": "Relevance evaluation could not be completed."
             }
+
 
         # -----------------------------
         # Accuracy Agent
         # -----------------------------
 
-        try:
+        if grounding_available:
 
-            accuracy_result = self.accuracy_agent.evaluate(
-                question,
-                response,
-                reference
-            )
+            try:
 
-        except Exception as e:
+                accuracy_result = self.accuracy_agent.evaluate(
+                    question,
+                    response,
+                    reference,
+                    retrieved_chunks
+                )
 
-            print("Accuracy Agent Error:", e)
+            except Exception as e:
+
+                print("Accuracy Agent Error:", e)
+
+                accuracy_result = {
+                    "score": None,
+                    "status": "error",
+                    "evidence": "Accuracy evaluation could not be completed."
+                }
+
+        else:
 
             accuracy_result = {
-
-                "score":0,
-
-                "evidence":"Unable to evaluate accuracy at the moment."
-
+                "score": None,
+                "status": "unverifiable",
+                "evidence":
+                    "No reference answer or sufficiently relevant "
+                    "retrieved evidence was available to verify "
+                    "the factual accuracy of this response."
             }
+
 
         # -----------------------------
         # Hallucination Agent
         # -----------------------------
 
+        if grounding_available:
+
+            try:
+
+                hallucination_result = (
+                    self.hallucination_agent.evaluate(
+                        response,
+                        reference,
+                        retrieved_chunks
+                    )
+                )
+
+            except Exception as e:
+
+                print("Hallucination Agent Error:", e)
+
+                hallucination_result = {
+                    "score": None,
+                    "status": "error",
+                    "reason": "Hallucination evaluation could not be completed.",
+                    "unsupported_claims": []
+                }
+
+        else:
+
+            hallucination_result = {
+                "score": None,
+                "status": "unverifiable",
+                "reason":
+                    "No reference answer or sufficiently relevant "
+                    "retrieved evidence was available to determine "
+                    "whether the response contains unsupported claims.",
+                "unsupported_claims": []
+            }
+
+
+        # -----------------------------
+        # Completeness Agent
+        # -----------------------------
+
         try:
 
-            hallucination_result = self.hallucination_agent.evaluate(
-                response,
-                reference
+            completeness_result = (
+                self.completeness_agent.evaluate(
+                    question,
+                    response
+                )
             )
 
         except Exception as e:
 
-            print("Hallucination Agent Error:", e)
+            print("Completeness Agent Error:", e)
 
-            hallucination_result = {
-
-                "score":0,
-
-                "reason":"Unable to evaluate hallucinations at the moment.",
-
-                "unsupported_claims":[]
-
+            completeness_result = {
+                "score": None,
+                "status": "error",
+                "omissions": [],
+                "reason": "Completeness evaluation could not be completed."
             }
 
         # -----------------------------
-        # Overall Score
+        # Verdict Agent
         # -----------------------------
 
-        overall_score = round(
+        try:
 
-            (
-                relevance_result["score"] +
-                accuracy_result["score"] +
-                hallucination_result["score"]
+            verdict_result = self.verdict_agent.evaluate(
+                relevance_result,
+                accuracy_result,
+                hallucination_result,
+                completeness_result
+            )
 
-            ) / 3,
+        except Exception as e:
 
-            1
+            print("Verdict Agent Error:", e)
 
-        )
+            verdict_result = {
+                "overall_score": None,
+                "verdict": "Unavailable",
+
+                "consolidated_summary":
+                    "Unable to generate the final verdict "
+                    "at the moment.",
+
+                "weights": {},
+
+                "quality_gate_reasons": [
+                    "The Verdict Agent encountered an error."
+                ]
+            }
+
+
+        # -----------------------------
+        # Final Evaluation Result
+        # -----------------------------
 
         return {
-
             "relevance": relevance_result,
-
             "accuracy": accuracy_result,
-
             "hallucination": hallucination_result,
+            "completeness": completeness_result,
 
-            "overall_score": overall_score
+            "overall_score":
+                verdict_result["overall_score"],
 
+            "verdict":
+                verdict_result["verdict"],
+
+            "consolidated_summary":
+                verdict_result.get(
+                    "consolidated_summary",
+                    verdict_result.get(
+                        "consolidated_reasoning",
+                        ""
+                    )
+                ),
+
+            "quality_gate_reasons":
+                verdict_result.get(
+                    "quality_gate_reasons",
+                    []
+                ),
+
+            "weights":
+                verdict_result.get(
+                    "weights",
+                    {}
+                ),
+
+            "grounding": {
+                "reference_available": has_reference,
+                "rag_evidence_available": has_rag_evidence,
+                "retrieved_documents": len(
+                    retrieved_chunks
+                )
+            }
+        }
+
+
+    # ==========================================
+    # Validation Error Helper
+    # ==========================================
+
+    def _validation_error(self, message):
+
+        return {
+            "relevance": {
+                "score": 0,
+                "reason": message
+            },
+
+            "accuracy": {
+                "score": 0,
+                "status": "error",
+                "evidence": message
+            },
+
+            "hallucination": {
+                "score": 0,
+                "status": "error",
+                "reason": message,
+                "unsupported_claims": []
+            },
+
+            "completeness": {
+                "score": 0,
+                "omissions": [],
+                "reason": message
+            },
+
+            "overall_score": 0,
+            "verdict": "Fail",
+
+            "consolidated_reasoning": message,
+
+            "reasoning": {
+                "relevance": message,
+                "accuracy": message,
+                "hallucination": message,
+                "completeness": message,
+                "verdict_adjustment": message
+            },
+
+            "quality_gate_reasons": [
+                message
+            ],
+
+            "weights": {},
+
+            "grounding": {
+                "reference_available": False,
+                "rag_evidence_available": False,
+                "retrieved_documents": 0
+            }
         }

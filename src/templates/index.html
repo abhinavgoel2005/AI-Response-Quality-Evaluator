@@ -5,412 +5,2134 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>AI Response Quality Evaluator</title>
 
     <!-- Google Font -->
 
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
 
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 
 </head>
 
-<body>
 
-<!-- ================= NAVBAR ================= -->
+<body
+    data-active-mode="{{ active_mode if active_mode else 'single' }}"
+    data-has-results="{{ 'true' if results else 'false' }}"
+    data-has-batch-results="{{ 'true' if batch_results else 'false' }}"
+>
+
+<!-- ==========================================
+     NAVBAR
+========================================== -->
 
 <nav>
 
     <div class="logo">
-
         🤖 AI Response Quality Evaluator
-
     </div>
 
     <div class="nav-links">
-
         <span>Gemini</span>
-
         <span>RAG</span>
-
         <span>Multi-Agent</span>
-
     </div>
 
 </nav>
 
-<!-- ================= HERO ================= -->
+
+<!-- ==========================================
+     HERO
+========================================== -->
 
 <section class="hero">
 
     <h1>
-
         Evaluate AI Responses with Intelligent Judge Agents
-
     </h1>
 
     <p>
-
-        Analyze relevance, accuracy and hallucinations
-        using Retrieval-Augmented Generation and
-        Large Language Models.
-
+        Analyze relevance, accuracy, hallucinations, and completeness
+        using Retrieval-Augmented Generation and Large Language Models.
     </p>
 
 </section>
 
-<!-- ================= MAIN ================= -->
 
-<div class="main-container">
+<!-- ==========================================
+     EVALUATION MODE SELECTOR
+========================================== -->
 
-    <!-- LEFT PANEL -->
+<section class="mode-section">
+
+    <div class="mode-switcher">
+
+        <button
+            type="button"
+            class="mode-btn
+            {% if active_mode != 'batch' %}active{% endif %}"
+            id="singleModeBtn"
+            data-mode="single"
+        >
+            ✨ Single Evaluation
+        </button>
+
+        <button
+            type="button"
+            class="mode-btn
+            {% if active_mode == 'batch' %}active{% endif %}"
+            id="batchModeBtn"
+            data-mode="batch"
+        >
+            📁 Batch Evaluation
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ==========================================
+     SINGLE EVALUATION MODE
+========================================== -->
+
+<div
+    id="singleEvaluationMode"
+    class="evaluation-mode
+    {% if active_mode == 'batch' %}mode-hidden{% endif %}"
+>
+
+<main class="main-container">
+
+
+    <!-- ======================================
+         INPUT WORKSPACE
+    ======================================= -->
 
     <section class="workspace">
 
-        <h2>Input Workspace</h2>
+        <div class="workspace-panel">
 
-        <form action="/evaluate" method="POST">
+            <div class="section-header">
 
-            <div class="input-card">
+                <h2>Input Workspace</h2>
 
-                <h3>💬 User Question</h3>
-
-                <textarea
-                    name="question"
-                    placeholder="Ask your question...">{{ question if question else "" }}</textarea>
-
-            </div>
-
-            <div class="input-card">
-
-                <h3>🤖 AI Generated Response</h3>
-
-                <textarea
-                    name="response"
-                    placeholder="Paste the AI generated response...">{{ response if response else "" }}</textarea>
+                <p>
+                    Submit an AI response for multi-dimensional
+                    quality evaluation.
+                </p>
 
             </div>
 
-            <div class="input-card">
 
-                <h3>📚 Reference Answer (Optional)</h3>
+            <form
+                action="/evaluate"
+                method="POST"
+            >
 
-                <textarea
-                    name="reference"
-                    placeholder="Optional reference answer...">{{ reference if reference else "" }}</textarea>
+                <!-- USER QUESTION -->
 
-            </div>
+                <div class="input-card">
 
-            <button type="submit">
+                    <h3>
+                        💬 User Question
+                    </h3>
 
-                ✨ Evaluate Response
+                    <textarea
+                        name="question"
+                        placeholder="Ask your question..."
+                        required
+                    >{{ question if question else "" }}</textarea>
 
-            </button>
+                </div>
 
-        </form>
+
+                <!-- AI RESPONSE -->
+
+                <div class="input-card">
+
+                    <h3>
+                        🤖 AI Generated Response
+                    </h3>
+
+                    <textarea
+                        name="response"
+                        placeholder="Paste the AI generated response..."
+                        required
+                    >{{ response if response else "" }}</textarea>
+
+                </div>
+
+
+                <!-- REFERENCE -->
+
+                <div class="input-card">
+
+                    <h3>
+                        📚 Reference Answer
+                        <span>(Optional)</span>
+                    </h3>
+
+                    <textarea
+                        name="reference"
+                        placeholder="Provide an optional reference answer..."
+                    >{{ reference if reference else "" }}</textarea>
+
+                    <p class="input-help">
+                        If no reference is provided, retrieved knowledge
+                        can be used as evidence by the evaluation pipeline.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="evaluate-btn"
+                >
+                    ✨ Evaluate Response
+                </button>
+
+            </form>
+
+        </div>
 
     </section>
 
-    <!-- RIGHT PANEL -->
 
-    <aside class="dashboard">
+    <!-- ======================================
+         EVALUATION DASHBOARD
+    ======================================= -->
 
-        <div class="dashboard-header">
+    <section class="dashboard">
 
-            <h2>
+        <div class="dashboard-panel">
 
-                Evaluation Dashboard
+            <div class="dashboard-header">
 
-            </h2>
+                <div>
 
-            <p>
-
-                {% if results %}
-                    Evaluation completed successfully.
-                {% else %}
-                    Waiting for evaluation...
-                {% endif %}
-
-            </p>
-
-        </div>
-
-        <!-- ================= RELEVANCE ================= -->
-
-        <div class="agent-card relevance">
-
-            <div class="agent-top">
-
-                <h3>🟢 Relevance Judge</h3>
-
-                <span class="status">
-
-                    {% if results %}
-                        Completed
-                    {% else %}
-                        Ready
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-            <h4>Score</h4>
-
-            <p>
-
-                {% if results %}
-                    {{ results.relevance.score }}/10
-                {% else %}
-                    -- /10
-                {% endif %}
-
-            </p>
-
-            <h4>Reason</h4>
-
-            <p>
-
-                {% if results %}
-                    {{ results.relevance.reason }}
-                {% else %}
-                    Waiting for evaluation...
-                {% endif %}
-
-            </p>
-
-        </div>
-
-        <!-- ================= ACCURACY ================= -->
-
-        <div class="agent-card accuracy">
-
-            <div class="agent-top">
-
-                <h3>🔵 Accuracy Judge</h3>
-
-                <span class="status">
-
-                    {% if results %}
-                        Completed
-                    {% else %}
-                        Ready
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-            <h4>Score</h4>
-
-            <p>
-
-                {% if results %}
-                    {{ results.accuracy.score }}/10
-                {% else %}
-                    -- /10
-                {% endif %}
-
-            </p>
-
-            <h4>Evidence</h4>
-
-            <p>
-
-                {% if results %}
-                    {{ results.accuracy.evidence }}
-                {% else %}
-                    Waiting for evaluation...
-                {% endif %}
-
-            </p>
-
-        </div>
-                <!-- ================= HALLUCINATION ================= -->
-
-        <div class="agent-card hallucination">
-
-            <div class="agent-top">
-
-                <h3>🟠 Hallucination Judge</h3>
-
-                <span class="status">
-
-                    {% if results %}
-                        Completed
-                    {% else %}
-                        Ready
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-            <h4>Score</h4>
-
-            <p>
-
-                {% if results %}
-                    {{ results.hallucination.score }}/10
-                {% else %}
-                    -- /10
-                {% endif %}
-
-            </p>
-
-            <h4>Reason</h4>
-
-            <p>
-
-                {% if results %}
-                    {{ results.hallucination.reason }}
-                {% else %}
-                    Waiting for evaluation...
-                {% endif %}
-
-            </p>
-
-            <h4>Unsupported Claims</h4>
-
-            {% if results %}
-
-                {% if results.hallucination.unsupported_claims %}
-
-                    <ul>
-
-                        {% for claim in results.hallucination.unsupported_claims %}
-
-                            <li>{{ claim }}</li>
-
-                        {% endfor %}
-
-                    </ul>
-
-                {% else %}
+                    <h2>
+                        Evaluation Dashboard
+                    </h2>
 
                     <p>
 
-                        No unsupported claims detected.
+                        {% if results %}
+
+                            Evaluation completed successfully.
+
+                        {% else %}
+
+                            Judge-agent results will appear here
+                            after evaluation.
+
+                        {% endif %}
 
                     </p>
 
+                </div>
+
+
+                {% if results %}
+
+                    <span class="evaluation-status">
+                        Evaluation Complete
+                    </span>
+
                 {% endif %}
 
-            {% else %}
+            </div>
 
-                <p>
 
-                    Waiting for evaluation...
+            <!-- ==================================
+                 AGENT GRID
+            =================================== -->
 
-                </p>
+            <div class="agent-grid">
 
-            {% endif %}
+
+                <!-- ==============================
+                     RELEVANCE
+                =============================== -->
+
+                <article class="agent-card relevance">
+
+                    <div class="agent-top">
+
+                        <h3>
+                            🟢 Relevance Judge
+                        </h3>
+
+                        <span class="status">
+
+                            {% if results %}
+
+                                {% if results.relevance.status == "error" %}
+                                    Error
+                                {% else %}
+                                    Completed
+                                {% endif %}
+
+                            {% else %}
+
+                                Ready
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-row">
+
+                        <span>
+                            Score
+                        </span>
+
+                        <strong>
+
+                            {% if results %}
+
+                                {% if results.relevance.score is not none %}
+
+                                    {{ results.relevance.score }}/10
+
+                                {% else %}
+
+                                    N/A
+
+                                {% endif %}
+
+                            {% else %}
+
+                                -- /10
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="agent-detail">
+
+                        <h4>
+                            Reason
+                        </h4>
+
+                        <p>
+
+                            {% if results %}
+
+                                {{ results.relevance.reason }}
+
+                            {% else %}
+
+                                Waiting for evaluation...
+
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- ==============================
+                     ACCURACY
+                =============================== -->
+
+                <article class="agent-card accuracy">
+
+                    <div class="agent-top">
+
+                        <h3>
+                            🔵 Accuracy Judge
+                        </h3>
+
+                        <span class="status">
+
+                            {% if results %}
+
+                                {% if results.accuracy.status == "error" %}
+                                    Error
+                                {% elif results.accuracy.status == "unverifiable" %}
+                                    Unverifiable
+                                {% else %}
+                                    Completed
+                                {% endif %}
+
+                            {% else %}
+
+                                Ready
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-row">
+
+                        <span>
+                            Score
+                        </span>
+
+                        <strong>
+
+                            {% if results %}
+
+                                {% if results.accuracy.score is not none %}
+
+                                    {{ results.accuracy.score }}/10
+
+                                {% else %}
+
+                                    N/A
+
+                                {% endif %}
+
+                            {% else %}
+
+                                -- /10
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="agent-detail">
+
+                        <h4>
+                            Supporting Evidence
+                        </h4>
+
+                        <p>
+
+                            {% if results %}
+
+                                {{ results.accuracy.evidence }}
+
+                            {% else %}
+
+                                Waiting for evaluation...
+
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- ==============================
+                     HALLUCINATION
+                =============================== -->
+
+                <article class="agent-card hallucination">
+
+                    <div class="agent-top">
+
+                        <h3>
+                            🟠 Hallucination Judge
+                        </h3>
+
+                        <span class="status">
+
+                            {% if results %}
+
+                                {% if results.hallucination.status == "error" %}
+                                    Error
+                                {% elif results.hallucination.status == "unverifiable" %}
+                                    Unverifiable
+                                {% else %}
+                                    Completed
+                                {% endif %}
+
+                            {% else %}
+
+                                Ready
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-row">
+
+                        <span>
+                            Grounding Score
+                        </span>
+
+                        <strong>
+
+                            {% if results %}
+
+                                {% if results.hallucination.score is not none %}
+
+                                    {{ results.hallucination.score }}/10
+
+                                {% else %}
+
+                                    N/A
+
+                                {% endif %}
+
+                            {% else %}
+
+                                -- /10
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="agent-detail">
+
+                        <h4>
+                            Reason
+                        </h4>
+
+                        <p>
+
+                            {% if results %}
+
+                                {{ results.hallucination.reason }}
+
+                            {% else %}
+
+                                Waiting for evaluation...
+
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="agent-detail">
+
+                        <h4>
+                            Unsupported Claims
+                        </h4>
+
+
+                        {% if results %}
+
+
+                            {% if results.hallucination.status == "unverifiable" %}
+
+                                <div class="info-message">
+                                    Unsupported claims could not be verified.
+                                </div>
+
+
+                            {% elif results.hallucination.unsupported_claims %}
+
+                                <ul class="findings-list">
+
+                                    {% for claim in results.hallucination.unsupported_claims %}
+
+                                        <li>
+                                            {{ claim }}
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+
+                            {% else %}
+
+                                <div class="success-message">
+                                    No unsupported claims detected.
+                                </div>
+
+                            {% endif %}
+
+
+                        {% else %}
+
+                            <p>
+                                Waiting for evaluation...
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+
+                <!-- ==============================
+                     COMPLETENESS
+                =============================== -->
+
+                <article class="agent-card completeness">
+
+                    <div class="agent-top">
+
+                        <h3>
+                            🟣 Completeness Judge
+                        </h3>
+
+                        <span class="status">
+
+                            {% if results %}
+
+                                {% if results.completeness.status == "error" %}
+                                    Error
+                                {% else %}
+                                    Completed
+                                {% endif %}
+
+                            {% else %}
+
+                                Ready
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-row">
+
+                        <span>
+                            Score
+                        </span>
+
+                        <strong>
+
+                            {% if results %}
+
+                                {% if results.completeness.score is not none %}
+
+                                    {{ results.completeness.score }}/10
+
+                                {% else %}
+
+                                    N/A
+
+                                {% endif %}
+
+                            {% else %}
+
+                                -- /10
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="agent-detail">
+
+                        <h4>
+                            Reason
+                        </h4>
+
+                        <p>
+
+                            {% if results %}
+
+                                {{ results.completeness.reason }}
+
+                            {% else %}
+
+                                Waiting for evaluation...
+
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="agent-detail">
+
+                        <h4>
+                            Omissions
+                        </h4>
+
+
+                        {% if results %}
+
+
+                            {% if results.completeness.omissions %}
+
+                                <ul class="findings-list">
+
+                                    {% for omission in results.completeness.omissions %}
+
+                                        <li>
+                                            {{ omission }}
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+
+                            {% else %}
+
+                                <p class="positive-finding">
+                                    No significant omissions detected.
+                                </p>
+
+                            {% endif %}
+
+
+                        {% else %}
+
+                            <p>
+                                Waiting for evaluation...
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <!-- ==================================
+                 OVERALL VERDICT
+            =================================== -->
+
+            <section class="verdict-card">
+
+                <div class="verdict-header">
+
+                    <div>
+
+                        <span class="verdict-label">
+                            Overall Quality Assessment
+                        </span>
+
+                        <h2>
+                            Overall Verdict
+                        </h2>
+
+                    </div>
+
+
+                    <div class="overall-score">
+
+                        <span>
+                            Overall Score
+                        </span>
+
+                        <strong>
+
+                            {% if results %}
+
+                                {% if results.overall_score is not none %}
+
+                                    {{ results.overall_score }}/10
+
+                                {% else %}
+
+                                    N/A
+
+                                {% endif %}
+
+                            {% else %}
+
+                                -- /10
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FINAL VERDICT -->
+
+                <div class="final-verdict">
+
+                    <span>
+                        Final Verdict
+                    </span>
+
+
+                    {% if results %}
+
+
+                        {% if results.verdict == "Pass" %}
+
+                            <strong class="verdict-badge verdict-pass">
+                                Pass
+                            </strong>
+
+
+                        {% elif results.verdict == "Needs Improvement" %}
+
+                            <strong class="verdict-badge verdict-improve">
+                                Needs Improvement
+                            </strong>
+
+
+                        {% else %}
+
+                            <strong class="verdict-badge verdict-fail">
+                                Fail
+                            </strong>
+
+                        {% endif %}
+
+
+                    {% else %}
+
+                        <strong class="verdict-badge">
+                            Waiting
+                        </strong>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- VERDICT SUMMARY -->
+
+                <div class="verdict-summary">
+
+                    <div class="verdict-summary-header">
+
+                        <span class="verdict-agent-label">
+                            Verdict Agent
+                        </span>
+
+                        <h3>
+                            Verdict Summary
+                        </h3>
+
+                    </div>
+
+
+                    {% if results %}
+
+                        <p>
+                            {{ results.consolidated_summary }}
+                        </p>
+
+                    {% else %}
+
+                        <p>
+                            The Verdict Agent will summarize the overall
+                            evaluation after the response is analyzed.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- QUALITY GATES -->
+
+                {% if results and results.quality_gate_reasons %}
+
+                    <div class="quality-gates">
+
+                        <h3>
+                            Quality Gate Findings
+                        </h3>
+
+                        <ul>
+
+                            {% for reason in results.quality_gate_reasons %}
+
+                                <li>
+                                    {{ reason }}
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
 
         </div>
 
-        <!-- ================= SUMMARY ================= -->
+    </section>
 
-        <div class="summary-card">
-
-            <h3>
-
-                📊 Evaluation Summary
-
-            </h3>
-
-            <div class="summary-item">
-
-                <span>Relevance</span>
-
-                <span>
-
-                    {% if results %}
-                        {{ results.relevance.score }}/10
-                    {% else %}
-                        --
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-            <div class="summary-item">
-
-                <span>Accuracy</span>
-
-                <span>
-
-                    {% if results %}
-                        {{ results.accuracy.score }}/10
-                    {% else %}
-                        --
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-            <div class="summary-item">
-
-                <span>Hallucination</span>
-
-                <span>
-
-                    {% if results %}
-                        {{ results.hallucination.score }}/10
-                    {% else %}
-                        --
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-            {% if results %}
-
-            <hr style="margin:20px 0; border:none; border-top:1px solid #e5e7eb;">
-
-            <div class="summary-item">
-
-                <span><strong>Overall Score</strong></span>
-
-                <span>
-
-                    {{
-                    (
-                        (
-                            results.relevance.score
-                            + results.accuracy.score
-                            + results.hallucination.score
-                        ) / 3
-                    ) | round(1)
-                    }}/10
-
-                </span>
-
-            </div>
-
-            {% endif %}
-
-        </div>
-
-    </aside>
+</main>
 
 </div>
 
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+<!-- ==========================================
+     BATCH EVALUATION MODE
+========================================== -->
+
+<div
+    id="batchEvaluationMode"
+    class="evaluation-mode
+    {% if active_mode != 'batch' %}mode-hidden{% endif %}"
+>
+
+    <main class="batch-container">
+
+
+        <!-- ======================================
+             BATCH UPLOAD
+        ======================================= -->
+
+        <section class="batch-upload-panel">
+
+            <div class="section-header">
+
+                <span class="batch-label">
+                    Batch Processing
+                </span>
+
+                <h2>
+                    📁 Batch Evaluation
+                </h2>
+
+                <p>
+                    Evaluate multiple AI responses automatically
+                    by uploading a CSV dataset.
+                </p>
+
+            </div>
+
+
+            <!-- CSV REQUIREMENTS -->
+
+            <div class="csv-requirements">
+
+                <div class="requirement-item">
+
+                    <span class="requirement-icon">
+                        ✓
+                    </span>
+
+                    <div>
+                        <strong>Required</strong>
+                        <p>question, response</p>
+                    </div>
+
+                </div>
+
+
+                <div class="requirement-item">
+
+                    <span class="requirement-icon optional">
+                        +
+                    </span>
+
+                    <div>
+                        <strong>Optional</strong>
+                        <p>reference</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ERROR MESSAGE -->
+
+            {% if batch_error %}
+
+                <div class="batch-error-message">
+
+                    <strong>
+                        Batch Evaluation Error
+                    </strong>
+
+                    <p>
+                        {{ batch_error }}
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- UPLOAD FORM -->
+
+            <form
+                action="/batch-evaluate"
+                method="POST"
+                enctype="multipart/form-data"
+                id="batch-upload-form"
+            >
+
+                <label
+                    for="csvFileInput"
+                    class="csv-upload-area"
+                    id="csvUploadArea"
+                >
+
+                    <div class="upload-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Upload CSV Dataset
+                    </h3>
+
+                    <p>
+                        Drag and drop your CSV file here
+                        or click to browse.
+                    </p>
+
+                    <span class="choose-file-btn">
+                        Choose CSV File
+                    </span>
+
+                    <small>
+                        Supported format: .csv
+                    </small>
+
+
+                    <input
+                        type="file"
+                        id="csvFileInput"
+                        name="batch_file"
+                        accept=".csv,text/csv"
+                        hidden
+                    >
+
+                </label>
+
+
+                <!-- SELECTED FILE -->
+
+                <div
+                    class="selected-file-card
+                    {% if not batch_filename %}file-hidden{% endif %}"
+                    id="selectedFileCard"
+                >
+
+                    <div class="selected-file-info">
+
+                        <span class="selected-file-icon">
+                            📄
+                        </span>
+
+                        <div>
+
+                            <span class="selected-file-label">
+                                Selected Dataset
+                            </span>
+
+                            <strong id="selectedFileName">
+                                {{ batch_filename if batch_filename else "" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="file-ready-status">
+                        ✓ Ready
+                    </span>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="evaluate-btn batch-evaluate-btn"
+                    id="batch-evaluate-btn"
+                >
+                    ✨ Evaluate Batch
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- ======================================
+             BATCH RESULTS
+        ======================================= -->
+
+        {% if batch_results %}
+
+        <section class="batch-results-section">
+
+
+            <!-- RESULTS HEADER -->
+
+            <div class="batch-results-header">
+
+                <div>
+
+                    <span class="batch-label">
+                        Evaluation Complete
+                    </span>
+
+                    <h2>
+                        Batch Evaluation Results
+                    </h2>
+
+                    <p>
+                        Aggregate statistics and individual
+                        evaluation outcomes for the uploaded dataset.
+                    </p>
+
+                </div>
+
+
+                {% if batch_filename %}
+
+                    <div class="dataset-badge">
+                        📄 {{ batch_filename }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ==================================
+                 SUMMARY CARDS
+            =================================== -->
+
+            <div class="batch-summary-grid">
+
+
+                <article class="batch-stat-card">
+
+                    <span class="batch-stat-label">
+                        Total Rows
+                    </span>
+
+                    <strong>
+                        {{ batch_results.total_rows }}
+                    </strong>
+
+                    <small>
+                        CSV records processed
+                    </small>
+
+                </article>
+
+
+                <article class="batch-stat-card stat-success">
+
+                    <span class="batch-stat-label">
+                        Successful
+                    </span>
+
+                    <strong>
+                        {{ batch_results.successful_rows }}
+                    </strong>
+
+                    <small>
+                        Fully evaluated rows
+                    </small>
+
+                </article>
+
+
+                <article class="batch-stat-card stat-partial">
+
+                    <span class="batch-stat-label">
+                        Partial
+                    </span>
+
+                    <strong>
+                        {{ batch_results.partial_rows }}
+                    </strong>
+
+                    <small>
+                        Incomplete evaluations
+                    </small>
+
+                </article>
+
+
+                <article class="batch-stat-card stat-failed">
+
+                    <span class="batch-stat-label">
+                        Failed
+                    </span>
+
+                    <strong>
+                        {{ batch_results.failed_rows }}
+                    </strong>
+
+                    <small>
+                        Evaluation failures
+                    </small>
+
+                </article>
+
+
+                <article class="batch-stat-card stat-score">
+
+                    <span class="batch-stat-label">
+                        Average Score
+                    </span>
+
+                    <strong>
+
+                        {% if batch_results.average_score is not none %}
+
+                            {{ batch_results.average_score }}/10
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                    <small>
+                        Successful scored rows
+                    </small>
+
+                </article>
+
+
+                <article class="batch-stat-card">
+
+                    <span class="batch-stat-label">
+                        Aggregated Rows
+                    </span>
+
+                    <strong>
+                        {{ batch_results.aggregated_rows }}
+                    </strong>
+
+                    <small>
+                        Used in aggregate metrics
+                    </small>
+
+                </article>
+
+            </div>
+
+
+            <!-- ==================================
+                 VERDICT DISTRIBUTION
+            =================================== -->
+
+            <section class="verdict-distribution-card">
+
+                <div class="batch-subsection-header">
+
+                    <div>
+
+                        <span class="batch-label">
+                            Aggregate Assessment
+                        </span>
+
+                        <h3>
+                            Final Verdict Distribution
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="verdict-distribution-grid">
+
+
+                    <div class="distribution-item distribution-pass">
+
+                        <span>
+                            ✓ Pass
+                        </span>
+
+                        <strong>
+                            {{ batch_results.verdict_counts.get("Pass", 0) }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="distribution-item distribution-improve">
+
+                        <span>
+                            ⚠ Needs Improvement
+                        </span>
+
+                        <strong>
+                            {{ batch_results.verdict_counts.get("Needs Improvement", 0) }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="distribution-item distribution-fail">
+
+                        <span>
+                            ✕ Fail
+                        </span>
+
+                        <strong>
+                            {{ batch_results.verdict_counts.get("Fail", 0) }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================
+                 INDIVIDUAL RESULTS TABLE
+            =================================== -->
+
+            <section class="batch-table-card">
+
+                <div class="batch-subsection-header">
+
+                    <div>
+
+                        <span class="batch-label">
+                            Per-Submission Results
+                        </span>
+
+                        <h3>
+                            Individual Evaluations
+                        </h3>
+
+                        <p>
+                            Expand a row to inspect its complete
+                            multi-agent evaluation.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="batch-table-wrapper">
+
+                    <table class="batch-results-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Row</th>
+
+                                <th>Question</th>
+
+                                <th>Rel.</th>
+
+                                <th>Acc.</th>
+
+                                <th>Hall.</th>
+
+                                <th>Comp.</th>
+
+                                <th>Overall</th>
+
+                                <th>Status</th>
+
+                                <th>Verdict</th>
+
+                                <th></th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                        {% for item in batch_results.results %}
+
+
+                            {% set evaluation = item.get("evaluation", {}) %}
+
+                            {% set relevance = evaluation.get("relevance", {}) %}
+
+                            {% set accuracy = evaluation.get("accuracy", {}) %}
+
+                            {% set hallucination = evaluation.get("hallucination", {}) %}
+
+                            {% set completeness = evaluation.get("completeness", {}) %}
+
+
+                            <!-- MAIN RESULT ROW -->
+
+                            <tr class="batch-result-row">
+
+                                <td>
+                                    {{ item.row_number }}
+                                </td>
+
+
+                                <td class="question-cell">
+
+                                    <span title="{{ item.question }}">
+                                        {{ item.question }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- RELEVANCE -->
+
+                                <td>
+
+                                    {% if relevance.get("score") is not none %}
+
+                                        {{ relevance.get("score") }}
+
+                                    {% else %}
+
+                                        N/A
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- ACCURACY -->
+
+                                <td>
+
+                                    {% if accuracy.get("score") is not none %}
+
+                                        {{ accuracy.get("score") }}
+
+                                    {% else %}
+
+                                        N/A
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- HALLUCINATION -->
+
+                                <td>
+
+                                    {% if hallucination.get("score") is not none %}
+
+                                        {{ hallucination.get("score") }}
+
+                                    {% else %}
+
+                                        N/A
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- COMPLETENESS -->
+
+                                <td>
+
+                                    {% if completeness.get("score") is not none %}
+
+                                        {{ completeness.get("score") }}
+
+                                    {% else %}
+
+                                        N/A
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- OVERALL -->
+
+                                <td>
+
+                                    {% if evaluation.get("overall_score") is not none %}
+
+                                        <strong>
+                                            {{ evaluation.get("overall_score") }}
+                                        </strong>
+
+                                    {% else %}
+
+                                        N/A
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    {% if item.status == "success" %}
+
+                                        <span class="row-status row-success">
+                                            Success
+                                        </span>
+
+
+                                    {% elif item.status == "partial" %}
+
+                                        <span class="row-status row-partial">
+                                            Partial
+                                        </span>
+
+
+                                    {% else %}
+
+                                        <span class="row-status row-error">
+                                            Error
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- VERDICT -->
+
+                                <td>
+
+                                    {% if item.status == "error" %}
+
+                                        <span class="table-verdict verdict-unavailable">
+                                            N/A
+                                        </span>
+
+
+                                    {% elif evaluation.get("verdict") == "Pass" %}
+
+                                        <span class="table-verdict table-pass">
+                                            Pass
+                                        </span>
+
+
+                                    {% elif evaluation.get("verdict") == "Needs Improvement" %}
+
+                                        <span class="table-verdict table-improve">
+                                            Needs Improvement
+                                        </span>
+
+
+                                    {% elif evaluation.get("verdict") == "Fail" %}
+
+                                        <span class="table-verdict table-fail">
+                                            Fail
+                                        </span>
+
+
+                                    {% else %}
+
+                                        <span class="table-verdict verdict-unavailable">
+                                            N/A
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- DETAILS BUTTON -->
+
+                                <td>
+
+                                    <button
+                                        type="button"
+                                        class="details-toggle"
+                                        data-target="batch-detail-{{ loop.index }}"
+                                    >
+                                        View Details
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- ==================================
+                                 EXPANDED DETAIL ROW
+                            =================================== -->
+
+                            <tr
+                                id="batch-detail-{{ loop.index }}"
+                                class="batch-detail-row"
+                            >
+
+                                <td colspan="10">
+
+                                    <div class="batch-detail-content">
+
+
+                                        <!-- DETAIL HEADER -->
+
+                                        <div class="batch-detail-header">
+
+                                            <div>
+
+                                                <span class="batch-label">
+                                                    Row {{ item.row_number }}
+                                                </span>
+
+                                                <h3>
+                                                    Evaluation Details
+                                                </h3>
+
+                                            </div>
+
+
+                                            {% if item.status == "success" %}
+
+                                                <span class="row-status row-success">
+                                                    ✓ Success
+                                                </span>
+
+
+                                            {% elif item.status == "partial" %}
+
+                                                <span class="row-status row-partial">
+                                                    ⚠ Partial
+                                                </span>
+
+
+                                            {% else %}
+
+                                                <span class="row-status row-error">
+                                                    ✕ Error
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+
+                                        <!-- QUESTION / RESPONSE -->
+
+                                        <div class="batch-input-details">
+
+                                            <div>
+
+                                                <h4>
+                                                    Question
+                                                </h4>
+
+                                                <p>
+                                                    {{ item.question }}
+                                                </p>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <h4>
+                                                    AI Response
+                                                </h4>
+
+                                                <p>
+                                                    {{ item.response }}
+                                                </p>
+
+                                            </div>
+
+
+                                            {% if item.reference %}
+
+                                                <div>
+
+                                                    <h4>
+                                                        Reference Answer
+                                                    </h4>
+
+                                                    <p>
+                                                        {{ item.reference }}
+                                                    </p>
+
+                                                </div>
+
+                                            {% endif %}
+
+                                        </div>
+
+
+                                        <!-- ==========================
+                                             ERROR ROW
+                                        =========================== -->
+
+                                        {% if item.status == "error" %}
+
+                                            <div class="batch-row-error">
+
+                                                <strong>
+                                                    Evaluation Error
+                                                </strong>
+
+                                                <p>
+                                                    {{ item.get(
+                                                        "error",
+                                                        "Evaluation could not be completed."
+                                                    ) }}
+                                                </p>
+
+                                            </div>
+
+
+                                        {% else %}
+
+
+                                            <!-- ======================
+                                                 AGENT DETAIL GRID
+                                            ======================= -->
+
+                                            <div class="batch-agent-grid">
+
+
+                                                <!-- RELEVANCE -->
+
+                                                <article class="batch-agent-card relevance">
+
+                                                    <div class="batch-agent-title">
+
+                                                        <h4>
+                                                            🟢 Relevance
+                                                        </h4>
+
+                                                        <strong>
+
+                                                            {% if relevance.get("score") is not none %}
+
+                                                                {{ relevance.get("score") }}/10
+
+                                                            {% else %}
+
+                                                                N/A
+
+                                                            {% endif %}
+
+                                                        </strong>
+
+                                                    </div>
+
+                                                    <p>
+                                                        {{ relevance.get(
+                                                            "reason",
+                                                            "No reasoning available."
+                                                        ) }}
+                                                    </p>
+
+                                                </article>
+
+
+                                                <!-- ACCURACY -->
+
+                                                <article class="batch-agent-card accuracy">
+
+                                                    <div class="batch-agent-title">
+
+                                                        <h4>
+                                                            🔵 Accuracy
+                                                        </h4>
+
+                                                        <strong>
+
+                                                            {% if accuracy.get("score") is not none %}
+
+                                                                {{ accuracy.get("score") }}/10
+
+                                                            {% else %}
+
+                                                                N/A
+
+                                                            {% endif %}
+
+                                                        </strong>
+
+                                                    </div>
+
+                                                    <p>
+                                                        {{ accuracy.get(
+                                                            "evidence",
+                                                            "No evidence available."
+                                                        ) }}
+                                                    </p>
+
+                                                </article>
+
+
+                                                <!-- HALLUCINATION -->
+
+                                                <article class="batch-agent-card hallucination">
+
+                                                    <div class="batch-agent-title">
+
+                                                        <h4>
+                                                            🟠 Hallucination
+                                                        </h4>
+
+                                                        <strong>
+
+                                                            {% if hallucination.get("score") is not none %}
+
+                                                                {{ hallucination.get("score") }}/10
+
+                                                            {% else %}
+
+                                                                N/A
+
+                                                            {% endif %}
+
+                                                        </strong>
+
+                                                    </div>
+
+
+                                                    <p>
+                                                        {{ hallucination.get(
+                                                            "reason",
+                                                            "No reasoning available."
+                                                        ) }}
+                                                    </p>
+
+
+                                                    {% if hallucination.get("unsupported_claims") %}
+
+                                                        <div class="batch-findings">
+
+                                                            <strong>
+                                                                Unsupported Claims
+                                                            </strong>
+
+                                                            <ul>
+
+                                                                {% for claim in hallucination.get("unsupported_claims", []) %}
+
+                                                                    <li>
+                                                                        {{ claim }}
+                                                                    </li>
+
+                                                                {% endfor %}
+
+                                                            </ul>
+
+                                                        </div>
+
+                                                    {% endif %}
+
+                                                </article>
+
+
+                                                <!-- COMPLETENESS -->
+
+                                                <article class="batch-agent-card completeness">
+
+                                                    <div class="batch-agent-title">
+
+                                                        <h4>
+                                                            🟣 Completeness
+                                                        </h4>
+
+                                                        <strong>
+
+                                                            {% if completeness.get("score") is not none %}
+
+                                                                {{ completeness.get("score") }}/10
+
+                                                            {% else %}
+
+                                                                N/A
+
+                                                            {% endif %}
+
+                                                        </strong>
+
+                                                    </div>
+
+
+                                                    <p>
+                                                        {{ completeness.get(
+                                                            "reason",
+                                                            "No reasoning available."
+                                                        ) }}
+                                                    </p>
+
+
+                                                    {% if completeness.get("omissions") %}
+
+                                                        <div class="batch-findings">
+
+                                                            <strong>
+                                                                Omissions
+                                                            </strong>
+
+                                                            <ul>
+
+                                                                {% for omission in completeness.get("omissions", []) %}
+
+                                                                    <li>
+                                                                        {{ omission }}
+                                                                    </li>
+
+                                                                {% endfor %}
+
+                                                            </ul>
+
+                                                        </div>
+
+                                                    {% endif %}
+
+                                                </article>
+
+                                            </div>
+
+
+                                            <!-- ======================
+                                                 BATCH VERDICT
+                                            ======================= -->
+
+                                            <section class="batch-verdict-card">
+
+                                                <div class="batch-verdict-top">
+
+                                                    <div>
+
+                                                        <span class="verdict-agent-label">
+                                                            Verdict Agent
+                                                        </span>
+
+                                                        <h3>
+                                                            Overall Assessment
+                                                        </h3>
+
+                                                    </div>
+
+
+                                                    <div class="batch-overall-score">
+
+                                                        <span>
+                                                            Overall Score
+                                                        </span>
+
+                                                        <strong>
+
+                                                            {% if evaluation.get("overall_score") is not none %}
+
+                                                                {{ evaluation.get("overall_score") }}/10
+
+                                                            {% else %}
+
+                                                                N/A
+
+                                                            {% endif %}
+
+                                                        </strong>
+
+                                                    </div>
+
+                                                </div>
+
+
+                                                <!-- VERDICT -->
+
+                                                <div class="final-verdict">
+
+                                                    <span>
+                                                        Final Verdict
+                                                    </span>
+
+
+                                                    {% if evaluation.get("verdict") == "Pass" %}
+
+                                                        <strong class="verdict-badge verdict-pass">
+                                                            Pass
+                                                        </strong>
+
+
+                                                    {% elif evaluation.get("verdict") == "Needs Improvement" %}
+
+                                                        <strong class="verdict-badge verdict-improve">
+                                                            Needs Improvement
+                                                        </strong>
+
+
+                                                    {% elif evaluation.get("verdict") == "Fail" %}
+
+                                                        <strong class="verdict-badge verdict-fail">
+                                                            Fail
+                                                        </strong>
+
+
+                                                    {% else %}
+
+                                                        <strong class="verdict-badge">
+                                                            N/A
+                                                        </strong>
+
+                                                    {% endif %}
+
+                                                </div>
+
+
+                                                <!-- SUMMARY -->
+
+                                                <div class="batch-verdict-summary">
+
+                                                    <h4>
+                                                        Verdict Summary
+                                                    </h4>
+
+                                                    <p>
+                                                        {{ evaluation.get(
+                                                            "consolidated_summary",
+                                                            "No verdict summary available."
+                                                        ) }}
+                                                    </p>
+
+                                                </div>
+
+
+                                                <!-- QUALITY GATES -->
+
+                                                {% if evaluation.get("quality_gate_reasons") %}
+
+                                                    <div class="quality-gates">
+
+                                                        <h3>
+                                                            Quality Gate Findings
+                                                        </h3>
+
+                                                        <ul>
+
+                                                            {% for reason in evaluation.get("quality_gate_reasons", []) %}
+
+                                                                <li>
+                                                                    {{ reason }}
+                                                                </li>
+
+                                                            {% endfor %}
+
+                                                        </ul>
+
+                                                    </div>
+
+                                                {% endif %}
+
+
+                                                <!-- PARTIAL WARNING -->
+
+                                                {% if item.status == "partial" %}
+
+                                                    <div class="partial-evaluation-warning">
+
+                                                        <strong>
+                                                            ⚠ Partial Evaluation
+                                                        </strong>
+
+                                                        <p>
+                                                            {{ item.get(
+                                                                "warning",
+                                                                "One or more judge agents could not complete the evaluation."
+                                                            ) }}
+                                                        </p>
+
+                                                    </div>
+
+                                                {% endif %}
+
+                                            </section>
+
+                                        {% endif %}
+
+
+                                        <!-- CLOSE DETAILS -->
+
+                                        <button
+                                            type="button"
+                                            class="close-details-btn"
+                                            data-target="batch-detail-{{ loop.index }}"
+                                        >
+                                            Close Details
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                        {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </section>
+
+        {% endif %}
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     JAVASCRIPT
+========================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/app.js') }}"
+></script>
 
 </body>
 
