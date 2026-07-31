@@ -1,0 +1,146 @@
+======================================================================
+AI RESPONSE QUALITY EVALUATION REPORT
+======================================================================
+
+Generated On : 31-07-2026 10:30 PM
+Dataset      : benchmark
+Samples      : 3
+
+======================================================================
+SUMMARY
+======================================================================
+
+Average Relevance Score      : 6.33/10
+Average Accuracy Score       : 5.67/10
+Average Hallucination Score  : 7.00/10
+Average Overall Score        : 6.30/10
+
+Highest Overall Score        : 8.50
+Lowest Overall Score         : 2.20
+
+======================================================================
+Sample ID : 2
+======================================================================
+
+Question:
+Who developed Python?
+
+Generated Response:
+Python was created by Guido van Rossum.
+
+Reference Answer:
+Python was created by Guido van Rossum in 1991.
+
+--------------------------------------------------
+RELEVANCE
+--------------------------------------------------
+Score : 9/10
+
+Reason:
+The response directly addresses the question by mentioning the name of the person who developed Python, staying focused on the requested topic.
+
+--------------------------------------------------
+ACCURACY
+--------------------------------------------------
+Score : 9/10
+
+Evidence:
+The AI response accurately states that Python was created by Guido van Rossum, which is supported by the reference answer. However, the reference answer also specifies the year 1991, which is not mentioned in the AI response.
+
+--------------------------------------------------
+HALLUCINATION
+--------------------------------------------------
+Score : 7/10
+
+Reason:
+The available evidence supports that Python was created by Guido van Rossum in 1991, but does not specify the year, making the claim unsupported.
+
+Unsupported Claims:
+  • Python was created by Guido van Rossum.
+
+Overall Score : 8.50/10
+
+======================================================================
+Sample ID : 3
+======================================================================
+
+Question:
+What is the capital of France?
+
+Generated Response:
+The capital of France is London.
+
+Reference Answer:
+Paris is the capital of France.
+
+--------------------------------------------------
+RELEVANCE
+--------------------------------------------------
+Score : 1/10
+
+Reason:
+The response barely addresses the question and is mostly unrelated, as it provides a completely different city as the capital of France.
+
+--------------------------------------------------
+ACCURACY
+--------------------------------------------------
+Score : 0/10
+
+Evidence:
+The AI response incorrectly stated that the capital of France is London, which contradicts the reference answer that Paris is the capital of France.
+
+--------------------------------------------------
+HALLUCINATION
+--------------------------------------------------
+Score : 7/10
+
+Reason:
+The available evidence contradicts the factual meaning of this claim, stating that Paris is the capital of France.
+
+Unsupported Claims:
+  • The capital of France is London.
+
+Overall Score : 2.20/10
+
+======================================================================
+Sample ID : 5
+======================================================================
+
+Question:
+What is Machine Learning?
+
+Generated Response:
+Machine Learning is a branch of AI that allows computers to learn from data.
+
+Reference Answer:
+Machine Learning is a subset of Artificial Intelligence that enables systems to learn from data.
+
+--------------------------------------------------
+RELEVANCE
+--------------------------------------------------
+Score : 9/10
+
+Reason:
+The response directly addresses the question by mentioning Machine Learning as a branch of AI that allows computers to learn from data, staying focused on the requested topic.
+
+--------------------------------------------------
+ACCURACY
+--------------------------------------------------
+Score : 8/10
+
+Evidence:
+The AI response is factually accurate in stating that Machine Learning is a branch of AI, but it incorrectly states that it 'allows computers to learn from data'. The correct phrase is 'enables systems to learn from data'.
+
+--------------------------------------------------
+HALLUCINATION
+--------------------------------------------------
+Score : 7/10
+
+Reason:
+The available evidence supports that Machine Learning is a subset of Artificial Intelligence that enables systems to learn from data, but it does not support the claim that it is a branch of AI. The evidence suggests that AI is a field of computer science focused on creating systems capable of performing tasks that normally require human intelligence, and Machine Learning is a subset of AI, but it does not imply that Machine Learning is a branch of AI.
+
+Unsupported Claims:
+  • Machine Learning is a branch of AI that allows computers to learn from data.
+
+Overall Score : 8.20/10
+
