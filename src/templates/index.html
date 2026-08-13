@@ -1123,13 +1123,24 @@
                 </div>
 
 
-                {% if batch_filename %}
+                <div class="batch-header-actions">
+
+                    {% if batch_filename %}
 
                     <div class="dataset-badge">
                         📄 {{ batch_filename }}
                     </div>
 
-                {% endif %}
+                    {% endif %}
+
+                    <a
+                        href="/download-report"
+                        class="download-report-btn"
+                    >
+                        📄 Download PDF Report
+                    </a>
+
+                </div>
 
             </div>
 
@@ -1254,6 +1265,198 @@
 
             </div>
 
+            <!-- ==================================
+                EVALUATION ANALYTICS
+            =================================== -->
+
+            <section class="analytics-card">
+
+                <div class="batch-subsection-header">
+
+                    <div>
+
+                        <span class="batch-label">
+                            Analytics
+                        </span>
+
+                        <h3>
+                            Evaluation Analytics
+                        </h3>
+
+                        <p>
+                            Aggregate quality metrics computed across all successful evaluations.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="analytics-grid">
+
+                    <div class="analytics-item analytics-green">
+
+                        <span>Average Relevance</span>
+
+                        <strong>
+                            {{ batch_results.analytics.average_relevance }}/10
+                        </strong>
+
+                    </div>
+
+                    <div class="analytics-item analytics-blue">
+
+                        <span>Average Accuracy</span>
+
+                        <strong>
+                            {{ batch_results.analytics.average_accuracy }}/10
+                        </strong>
+
+                    </div>
+
+                    <div class="analytics-item analytics-orange">
+
+                        <span>Average Hallucination</span>
+
+                        <strong>
+                            {{ batch_results.analytics.average_hallucination }}/10
+                        </strong>
+
+                    </div>
+
+                    <div class="analytics-item analytics-purple">
+
+                        <span>Average Completeness</span>
+
+                        <strong>
+                            {{ batch_results.analytics.average_completeness }}/10
+                        </strong>
+
+                    </div>
+
+                    <div class="analytics-item analytics-teal">
+
+                        <span>Best Performing Dimension</span>
+
+                        <strong class="dimension-color
+                        {% if batch_results.analytics.best_dimension == 'Relevance' %}
+                        dimension-relevance
+                        {% elif batch_results.analytics.best_dimension == 'Accuracy' %}
+                        dimension-accuracy
+                        {% elif batch_results.analytics.best_dimension == 'Hallucination' %}
+                        dimension-hallucination
+                        {% elif batch_results.analytics.best_dimension == 'Completeness' %}
+                        dimension-completeness
+                        {% endif %}">
+                            {{ batch_results.analytics.best_dimension }}
+
+                        </strong>
+
+                    </div>
+
+                    <div class="analytics-item analytics-amber">
+
+                        <span>Weakest Dimension</span>
+
+                        <strong class="dimension-color
+                        {% if batch_results.analytics.weakest_dimension == 'Relevance' %}
+                        dimension-relevance
+                        {% elif batch_results.analytics.weakest_dimension == 'Accuracy' %}
+                        dimension-accuracy
+                        {% elif batch_results.analytics.weakest_dimension == 'Hallucination' %}
+                        dimension-hallucination
+                        {% elif batch_results.analytics.weakest_dimension == 'Completeness' %}
+                        dimension-completeness
+                        {% endif %}">
+
+                            {{ batch_results.analytics.weakest_dimension }}
+
+                        </strong>
+
+                    </div>
+
+                   <div class="analytics-item analytics-rose">
+
+                        <span>Hallucination Frequency</span>
+
+                        <strong>
+
+                            {{ batch_results.analytics.hallucination_frequency }}%
+
+                        </strong>
+
+                    </div>
+
+                    <div class="analytics-item analytics-slate">
+
+                        <span>Grounded Responses</span>
+
+                        <strong>
+
+                            {{ batch_results.analytics.responses_without_hallucinations }}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ==================================
+                EVALUATION CHARTS
+            =================================== -->
+
+            <section class="charts-card">
+
+                <div class="batch-subsection-header">
+
+                    <div>
+
+                        <span class="batch-label">
+                            Visual Analytics
+                        </span>
+
+                        <h3>
+                            Evaluation Charts
+                        </h3>
+
+                        <p>
+                            Interactive visualization of evaluation statistics.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="charts-grid">
+
+                    <div class="chart-container">
+
+                        <h4>Average Dimension Scores</h4>
+
+                        <canvas id="dimensionChart"></canvas>
+
+                    </div>
+
+                    <div class="chart-container">
+
+                        <h4>Verdict Distribution</h4>
+
+                        <canvas id="verdictChart"></canvas>
+
+                    </div>
+
+                    <div class="chart-container chart-wide">
+
+                        <h4>Quality Trend</h4>
+
+                        <canvas id="qualityTrendChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </section>
 
             <!-- ==================================
                  VERDICT DISTRIBUTION
@@ -2129,6 +2332,20 @@
 <!-- ==========================================
      JAVASCRIPT
 ========================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
+
+<script>
+
+window.batchAnalytics = JSON.parse(
+    '{{ analytics_json | default("{}") | safe }}'
+);
+
+window.batchVerdicts = JSON.parse(
+    '{{ verdict_json | default("{}") | safe }}'
+);
+
+</script>
 
 <script
     src="{{ url_for('static', filename='js/app.js') }}"

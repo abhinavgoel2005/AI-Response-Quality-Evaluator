@@ -430,6 +430,13 @@ AI-Response-Quality-Evaluator/
 │   │   │   └──app.js
 │   │   └── images/
 │   │
+│   ├── testing/
+│   │   ├── test_cases.py
+│   │   ├── test_runner.py
+│   │   ├── test_batch_small.csv
+│   │   ├── test_batch_extended.csv
+│   │   └── test_results.json
+│   │
 │   ├── templates/
 │   │   └── index.html
 │   │
@@ -458,6 +465,29 @@ AI-Response-Quality-Evaluator/
 ├── README.md
 └── requirements.txt
 ```
+
+---
+
+# 🧪 Testing Results
+
+The project includes an automated end-to-end testing suite containing
+**14 test cases** covering functional correctness, error handling,
+scoring consistency, performance, and complete pipeline integration.
+
+### Latest Completed Test Run
+
+```text
+======================================================================
+TEST SUMMARY
+======================================================================
+
+Total Tests : 14
+Passed      : 14
+Failed      : 0
+Duration    : 600.53 sec
+======================================================================
+
+All End-to-End tests completed successfully.
 
 ---
 

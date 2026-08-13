@@ -1,18 +1,22 @@
 from flask import (
     Flask,
     render_template,
-    request
+    request,
+    send_file
 )
-
+import os
+import json
 from backend.evaluator import ResponseEvaluator
 from backend.batch_evaluator import BatchEvaluator
-
+from backend.pdf_report import PDFReportGenerator
 
 # ==========================================
 # FLASK APPLICATION
 # ==========================================
 
 app = Flask(__name__)
+
+latest_batch_results = None
 
 
 # ==========================================
@@ -105,6 +109,8 @@ def evaluate():
 )
 def batch_evaluate():
 
+    global latest_batch_results
+
     # --------------------------------------
     # Get Uploaded CSV
     # --------------------------------------
@@ -166,6 +172,8 @@ def batch_evaluate():
             )
         )
 
+        latest_batch_results = batch_results
+
 
     except ValueError as e:
 
@@ -214,6 +222,14 @@ def batch_evaluate():
     # Render Batch Results
     # --------------------------------------
 
+    analytics_json = json.dumps(
+        batch_results["analytics"]
+    )
+
+    verdict_json = json.dumps(
+        batch_results["verdict_counts"]
+    )
+
     return render_template(
         "index.html",
 
@@ -221,9 +237,51 @@ def batch_evaluate():
 
         batch_filename=file.filename,
 
-        batch_results=batch_results
+        batch_results=batch_results,
+
+        analytics_json=analytics_json,
+
+        verdict_json=verdict_json
     )
 
+# ==========================================
+# DOWNLOAD PDF REPORT
+# ==========================================
+
+@app.route("/download-report")
+
+def download_report():
+
+    global latest_batch_results
+
+    if latest_batch_results is None:
+
+        return "No batch evaluation available.", 400
+
+    generator = PDFReportGenerator()
+
+    output_path = os.path.join(
+        app.root_path,
+        "batch_evaluation_report.pdf"
+    )
+
+    generator.generate_report(
+
+        latest_batch_results,
+
+        output_path
+
+    )
+
+    return send_file(
+
+        output_path,
+
+        as_attachment=True,
+
+        download_name="AI_Response_Quality_Report.pdf"
+
+    )
 
 # ==========================================
 # RUN APPLICATION
@@ -234,3 +292,4 @@ if __name__ == "__main__":
     app.run(
         debug=True
     )
+

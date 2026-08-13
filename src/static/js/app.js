@@ -469,3 +469,269 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+/* ==========================================
+   BATCH CHARTS
+========================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    if (!window.batchAnalytics) return;
+
+    const analytics = window.batchAnalytics;
+    const verdicts = window.batchVerdicts;
+    // -----------------------------
+    // Dimension Bar Chart
+    // -----------------------------
+
+    const dimensionCanvas =
+        document.getElementById("dimensionChart");
+
+    if (dimensionCanvas) {
+
+        new Chart(dimensionCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: [
+                    "Relevance",
+                    "Accuracy",
+                    "Hallucination",
+                    "Completeness"
+                ],
+
+                datasets: [{
+
+                    label: "Average Score",
+
+                    data: [
+
+                        analytics.average_relevance,
+                        analytics.average_accuracy,
+                        analytics.average_hallucination,
+                        analytics.average_completeness
+
+                    ],
+
+                    backgroundColor: [
+
+                        "#22c55e",   // Relevance
+
+                        "#3b82f6",   // Accuracy
+
+                        "#f97316",   // Hallucination
+
+                        "#8b5cf6"    // Completeness
+
+                    ],
+
+                    borderColor: [
+                        "#16a34a",
+                        "#2563eb",
+                        "#ea580c",
+                        "#7c3aed"
+                    ],
+
+                    borderWidth: 2,
+
+                    borderRadius: 8
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 10
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+    // -----------------------------
+    // Verdict Pie
+    // -----------------------------
+
+    const verdictCanvas =
+        document.getElementById("verdictChart");
+
+    if (verdictCanvas) {
+
+        new Chart(verdictCanvas, {
+
+            type: "pie",
+
+            data: {
+
+                labels: [
+
+                    "Pass",
+
+                    "Needs Improvement",
+
+                    "Fail"
+
+                ],
+
+                datasets: [{
+
+                    data: [
+
+                        verdicts.Pass || 0,
+                        verdicts["Needs Improvement"] || 0,
+                        verdicts.Fail || 0
+
+                    ],
+
+                    backgroundColor: [
+
+                        "#22c55e",      
+
+                        "#6366f1",      
+
+                        "#ef4444"       
+
+                    ],
+
+                    borderColor: "#ffffff",
+
+                    borderWidth: 3
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom"
+                    },
+
+                    tooltip: {
+
+                        enabled: true
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+    // -----------------------------
+    // Quality Trend
+    // -----------------------------
+
+    const trendCanvas =
+        document.getElementById("qualityTrendChart");
+
+    if (trendCanvas) {
+
+        new Chart(trendCanvas, {
+
+            type: "line",
+
+            data: {
+
+                labels:
+
+                    analytics.quality_trend.map(
+                        (_, i) => "Row " + (i + 1)
+                    ),
+
+                datasets: [{
+
+                    label: "Overall Score",
+
+                    data:
+                        analytics.quality_trend,
+
+                    borderColor: "#4f46e5",
+
+                    backgroundColor: "rgba(79,70,229,0.15)",
+
+                    pointBackgroundColor: "#4f46e5",
+
+                    pointBorderColor: "#ffffff",
+
+                    pointRadius: 6,
+
+                    pointHoverRadius: 8,
+
+                    borderWidth: 4,
+
+                    tension: 0,
+
+                    fill: true
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                interaction: {
+
+                    mode: "nearest",
+
+                    intersect: true
+
+                },
+
+                plugins: {
+
+                    tooltip: {
+
+                        mode: "nearest",
+
+                        intersect: true
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 10
+
+                    }
+
+                }
+
+            }
+        });
+
+    }
+
+});

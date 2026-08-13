@@ -525,7 +525,31 @@ class BatchEvaluator:
 
 
         overall_scores = []
+        relevance_scores = []
+        accuracy_scores = []
+        hallucination_scores = []
+        completeness_scores = []
 
+        responses_with_hallucinations = 0
+        responses_without_hallucinations = 0
+
+        quality_trend = []
+
+        highest_score = None
+        lowest_score = None
+
+        # -----------------------------
+        # Dimension Trends
+        # -----------------------------
+
+        dimension_trends = {
+
+            "relevance": [],
+            "accuracy": [],
+            "hallucination": [],
+            "completeness": []
+
+        }
 
         # -----------------------------
         # Aggregate Valid Evaluations
@@ -553,7 +577,75 @@ class BatchEvaluator:
                 {}
             )
 
+            # -------------------------
+            # Dimension Scores
+            # -------------------------
 
+            relevance = (
+                evaluation.get("relevance", {})
+                .get("score")
+            )
+
+            accuracy = (
+                evaluation.get("accuracy", {})
+                .get("score")
+            )
+
+            hallucination = (
+                evaluation.get("hallucination", {})
+                .get("score")
+            )
+
+            completeness = (
+                evaluation.get("completeness", {})
+                .get("score")
+            )
+
+            if isinstance(relevance, (int, float)):
+
+                relevance_scores.append(relevance)
+
+                dimension_trends["relevance"].append(
+                    relevance
+                )
+
+            if isinstance(accuracy, (int, float)):
+
+                accuracy_scores.append(accuracy)
+
+                dimension_trends["accuracy"].append(
+                    accuracy
+                )
+
+            if isinstance(hallucination, (int, float)):
+
+                hallucination_scores.append(
+                    hallucination
+                )
+
+                dimension_trends["hallucination"].append(
+                    hallucination
+                )
+
+            if isinstance(completeness, (int, float)):
+
+                completeness_scores.append(
+                    completeness
+                )
+
+                dimension_trends["completeness"].append(
+                    completeness
+                )
+
+            unsupported_claims = (
+                evaluation.get("hallucination", {})
+                .get("unsupported_claims", [])
+            )
+
+            if unsupported_claims:
+                responses_with_hallucinations += 1
+            else:
+                responses_without_hallucinations += 1
             # -------------------------
             # Verdict Counts
             # -------------------------
@@ -589,7 +681,13 @@ class BatchEvaluator:
                     score
                 )
 
+                quality_trend.append(score)
 
+                if highest_score is None or score > highest_score:
+                    highest_score = score
+
+                if lowest_score is None or score < lowest_score:
+                    lowest_score = score
         # -----------------------------
         # Average Overall Score
         # -----------------------------
@@ -626,6 +724,120 @@ class BatchEvaluator:
         )
 
 
+        def average(values):
+
+            if not values:
+                return None
+
+            return round(sum(values) / len(values), 1)
+
+
+        average_relevance = average(relevance_scores)
+        average_accuracy = average(accuracy_scores)
+        average_hallucination = average(hallucination_scores)
+        average_completeness = average(completeness_scores)
+
+        # -----------------------------
+        # Verdict Percentages
+        # -----------------------------
+
+        total_verdicts = sum(
+            verdict_counts.values()
+        )
+
+        if total_verdicts:
+
+            pass_percentage = round(
+                verdict_counts["Pass"] * 100
+                / total_verdicts,
+                1
+            )
+
+            needs_improvement_percentage = round(
+                verdict_counts["Needs Improvement"] * 100
+                / total_verdicts,
+                1
+            )
+
+            fail_percentage = round(
+                verdict_counts["Fail"] * 100
+                / total_verdicts,
+                1
+            )
+
+        else:
+
+            pass_percentage = 0
+            needs_improvement_percentage = 0
+            fail_percentage = 0
+
+
+        # -----------------------------
+        # Hallucination Frequency
+        # -----------------------------
+
+        if aggregated_rows:
+
+            hallucination_frequency = round(
+                responses_with_hallucinations
+                * 100
+                / aggregated_rows,
+                1
+            )
+
+        else:
+
+            hallucination_frequency = 0
+
+
+        # -----------------------------
+        # Best / Weakest Dimension
+        # -----------------------------
+
+        dimension_averages = {
+
+            "Relevance":
+                average_relevance,
+
+            "Accuracy":
+                average_accuracy,
+
+            "Hallucination":
+                average_hallucination,
+
+            "Completeness":
+                average_completeness
+
+        }
+
+        valid_dimensions = {
+
+            key: value
+
+            for key, value
+            in dimension_averages.items()
+
+            if value is not None
+
+        }
+
+        if valid_dimensions:
+
+            best_dimension = max(
+                valid_dimensions,
+                key=valid_dimensions.get
+            )
+
+            weakest_dimension = min(
+                valid_dimensions,
+                key=valid_dimensions.get
+            )
+
+        else:
+
+            best_dimension = None
+            weakest_dimension = None
+
         # ==========================================
         # RETURN BATCH RESULT
         # ==========================================
@@ -655,6 +867,58 @@ class BatchEvaluator:
 
             "verdict_counts":
                 verdict_counts,
+
+            "analytics": {
+
+                "average_relevance":
+                    average_relevance,
+
+                "average_accuracy":
+                    average_accuracy,
+
+                "average_hallucination":
+                    average_hallucination,
+
+                "average_completeness":
+                    average_completeness,
+
+                "responses_with_hallucinations":
+                    responses_with_hallucinations,
+
+                "responses_without_hallucinations":
+                    responses_without_hallucinations,
+
+                "hallucination_frequency":
+                    hallucination_frequency,
+
+                "highest_score":
+                    highest_score,
+
+                "lowest_score":
+                    lowest_score,
+
+                "best_dimension":
+                    best_dimension,
+
+                "weakest_dimension":
+                    weakest_dimension,
+
+                "quality_trend":
+                    quality_trend,
+
+                "dimension_trends":
+                    dimension_trends,
+
+                "pass_percentage":
+                    pass_percentage,
+
+                "needs_improvement_percentage":
+                    needs_improvement_percentage,
+
+                "fail_percentage":
+                    fail_percentage
+
+            },
 
             "results":
                 batch_results

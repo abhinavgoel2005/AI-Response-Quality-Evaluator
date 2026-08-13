@@ -1,0 +1,142 @@
+[
+    {
+        "test_name": "Batch Evaluation",
+        "status": "PASS",
+        "execution_time": 369.347,
+        "details": {
+            "status": "PASS",
+            "execution_time": 369.346,
+            "rows_processed": 15,
+            "successful_rows": 15
+        }
+    },
+    {
+        "test_name": "Analytics Generation",
+        "status": "PASS",
+        "execution_time": 0.0,
+        "details": {
+            "status": "PASS",
+            "analytics_verified": true
+        }
+    },
+    {
+        "test_name": "Verdict Generation",
+        "status": "PASS",
+        "execution_time": 0.0,
+        "details": {
+            "status": "PASS",
+            "verified_verdicts": 15
+        }
+    },
+    {
+        "test_name": "Batch Statistics",
+        "status": "PASS",
+        "execution_time": 0.0,
+        "details": {
+            "status": "PASS",
+            "rows": 15,
+            "successful": 15,
+            "partial": 0,
+            "failed": 0
+        }
+    },
+    {
+        "test_name": "PDF Report Generation",
+        "status": "PASS",
+        "execution_time": 0.293,
+        "details": {
+            "status": "PASS",
+            "pdf_size_bytes": 34742,
+            "execution_time": 0.285
+        }
+    },
+    {
+        "test_name": "Hallucination Detection",
+        "status": "PASS",
+        "execution_time": 0.0,
+        "details": {
+            "status": "PASS",
+            "hallucination_frequency": 60.0,
+            "responses_with_hallucinations": 9,
+            "responses_without_hallucinations": 6
+        }
+    },
+    {
+        "test_name": "Dashboard Metrics",
+        "status": "PASS",
+        "execution_time": 0.0,
+        "details": {
+            "status": "PASS",
+            "quality_points": 15
+        }
+    },
+    {
+        "test_name": "Missing CSV Validation",
+        "status": "PASS",
+        "execution_time": 0.263,
+        "details": {
+            "status": "PASS",
+            "validation": "Missing CSV correctly rejected"
+        }
+    },
+    {
+        "test_name": "Invalid File Type",
+        "status": "PASS",
+        "execution_time": 0.083,
+        "details": {
+            "status": "PASS",
+            "validation": "Non-CSV file correctly rejected"
+        }
+    },
+    {
+        "test_name": "Invalid CSV Columns",
+        "status": "PASS",
+        "execution_time": 0.087,
+        "details": {
+            "status": "PASS",
+            "validation": "CSV with invalid columns correctly rejected"
+        }
+    },
+    {
+        "test_name": "Empty CSV Validation",
+        "status": "PASS",
+        "execution_time": 0.077,
+        "details": {
+            "status": "PASS",
+            "validation": "Empty CSV correctly rejected"
+        }
+    },
+    {
+        "test_name": "Scoring Consistency",
+        "status": "PASS",
+        "execution_time": 153.38,
+        "details": {
+            "status": "PASS",
+            "runs_compared": 2,
+            "consistency": "Verified"
+        }
+    },
+    {
+        "test_name": "Performance Benchmark",
+        "status": "PASS",
+        "execution_time": 77.073,
+        "details": {
+            "status": "PASS",
+            "execution_time": 76.875,
+            "rows_processed": 3,
+            "successful_rows": 3,
+            "partial_rows": 0,
+            "failed_rows": 0,
+            "average_score": 8.1
+        }
+    },
+    {
+        "test_name": "Complete Pipeline",
+        "status": "PASS",
+        "execution_time": 0.0,
+        "details": {
+            "status": "PASS",
+            "pipeline": "Complete"
+        }
+    }
+]
