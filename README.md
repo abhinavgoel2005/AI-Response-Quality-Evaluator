@@ -1,6 +1,6 @@
 # 🤖 AI Response Quality Evaluator
 
-> An intelligent multi-agent framework for evaluating the quality of Large Language Model (LLM) responses using Retrieval-Augmented Generation (RAG), benchmark datasets, and specialized AI judges.
+>  An intelligent multi-agent system for evaluating the quality of Large Language Model (LLM) responses using Retrieval-Augmented Generation (RAG), specialized evaluation agents, batch evaluation, analytics, and automated reporting.
 
 <p align="center">
 
@@ -37,24 +37,36 @@ To ensure objective validation, the framework also supports **benchmark-based ev
 
 # ✨ Key Features
 
-## 🌐 Web Application
-
-- Modern Flask-based web interface
-- User-friendly evaluation workspace
-- Interactive evaluation dashboard
-- Responsive design
+- 🤖 **Multi-Agent Evaluation** — Evaluates responses using specialized Relevance, Accuracy, Hallucination, and Completeness agents.
+- 📚 **RAG-Based Evaluation** — Retrieves supporting evidence from a semantic knowledge base using Sentence Transformers and FAISS.
+- 🎯 **Evidence-Aware Evaluation** — Accuracy and Hallucination are marked as unverifiable when suitable grounding evidence is unavailable.
+- 📦 **Batch Evaluation** — Evaluate multiple question-response pairs using CSV files.
+- 📊 **Evaluation Dashboard** — View scores, dimension-wise analytics, verdict distribution, trends, and evaluation statistics.
+- 📄 **PDF Report Export** — Generate downloadable PDF reports for batch evaluations.
+- 🧪 **End-to-End Testing** — Complete evaluation pipeline validated with 14/14 tests passed.
+- 🔍 **Scoring Consistency Validation** — Validate evaluation stability across repeated executions.
 
 ---
 
-## 🤖 Multi-Agent Evaluation
+# 🤖 Multi-Agent Evaluation
 
-The system evaluates AI responses using specialized judge agents, with each agent focusing on a distinct quality dimension:
+The system evaluates AI responses across four independent quality dimensions:
 
-- ✅ Relevance Judge
-- ✅ Accuracy Judge
-- ✅ Hallucination Judge
-- ✅ Completeness Judge
-- ✅ Verdict Agent
+| Agent | Responsibility |
+|---|---|
+| **Relevance Agent** | Determines whether the response directly addresses the question |
+| **Accuracy Agent** | Evaluates factual correctness using available evidence |
+| **Hallucination Agent** | Identifies unsupported claims |
+| **Completeness Agent** | Checks whether important aspects of the question are adequately covered |
+| **Verdict Agent** | Consolidates all agent results into the final assessment |
+
+The Verdict Agent produces:
+
+- Overall score
+- Final verdict
+- Consolidated summary
+- Quality-gate reasons
+- Evaluation weights
 
 ### Relevance Judge
 
@@ -89,26 +101,35 @@ This multi-agent design keeps individual quality dimensions independently explai
 
 ---
 
-## 📚 Retrieval-Augmented Generation (RAG)
+# 📚 Retrieval-Augmented Evaluation
 
-The evaluation framework includes a Retrieval-Augmented Generation pipeline for grounding factual evaluations in external knowledge.
+The system uses Retrieval-Augmented Generation (RAG) to provide supporting evidence for factual evaluation.
 
-The RAG pipeline:
+## RAG Pipeline
 
-1. Loads documents from the project knowledge base.
-2. Generates semantic embeddings using Sentence Transformers.
-3. Stores and searches embeddings using FAISS.
-4. Retrieves the most relevant documents for the submitted question.
-5. Applies a similarity threshold to reject weak or unrelated evidence.
-6. Supplies sufficiently relevant evidence to the Accuracy and Hallucination judges.
-
-If neither a reference answer nor sufficiently relevant retrieved evidence is available, evidence-dependent dimensions are marked as **unverifiable (N/A)** rather than generating unsupported factual judgments.
-
-This prevents unrelated retrieved documents from being treated as evidence.
+```text
+Knowledge Base
+      ↓
+Document Embeddings
+      ↓
+all-MiniLM-L6-v2
+      ↓
+FAISS Vector Index
+      ↓
+Question Embedding
+      ↓
+Top-3 Semantic Retrieval
+      ↓
+Similarity Threshold (0.35)
+      ↓
+Relevant Evidence
+      ↓
+Accuracy & Hallucination Evaluation
+```
 
 ---
 
-## 📊 Benchmark Validation Framework
+# 📊 Benchmark Validation Framework
 
 Beyond manual evaluation, the project includes an automated validation framework capable of evaluating the evaluator itself using benchmark datasets.
 
@@ -123,7 +144,7 @@ Current capabilities include:
 
 ---
 
-## 📁 Batch Evaluation
+# 📁 Batch Evaluation
 
 The Batch Evaluation Module enables automatic evaluation of multiple question-response pairs from a CSV file.
 
@@ -157,7 +178,69 @@ Only fully successful rows contribute to aggregate score and verdict statistics.
 
 ---
 
-## 🧩 Modular Architecture
+# 📊 Evaluation Scoring Dashboard
+
+The dashboard provides a visual summary of single and batch evaluation results.
+
+## Dashboard Analytics
+
+- Total evaluations
+- Successful, partial, and failed evaluations
+- Average overall score
+- Average Relevance score
+- Average Accuracy score
+- Average Hallucination score
+- Average Completeness score
+- Highest and lowest scores
+- Best and weakest dimensions
+- Hallucination frequency
+- Quality trends
+- Dimension-wise trends
+- Verdict distribution
+- Pass / Needs Improvement / Fail percentages
+
+Partial or failed evaluations are excluded from aggregate quality metrics so that incomplete evaluations do not distort the results.
+
+---
+
+# 📄 PDF Report Export
+
+The application supports automated PDF report generation for batch evaluations.
+
+## Report Workflow
+
+```text
+CSV Input
+   ↓
+Batch Evaluation
+   ↓
+Evaluation Results + Analytics
+   ↓
+PDF Report Generator
+   ↓
+AI_Response_Quality_Report.pdf
+```
+
+---
+
+# 🧪 End-to-End Testing
+
+The project includes a dedicated testing suite for validating the complete evaluation pipeline.
+
+## Latest Test Results
+
+| Metric | Result |
+|---|---:|
+| Total Tests | **14** |
+| Passed | **14** |
+| Failed | **0** |
+| Pass Rate | **100%** |
+
+The test suite covers batch evaluation, analytics generation, verdict generation, PDF report generation, CSV validation, error handling, scoring consistency, performance, and complete pipeline integration.
+
+---
+
+# 🧩 Modular Architecture
 
 The project is organized into independent modules for:
 
@@ -264,22 +347,67 @@ The uploaded CSV must contain the required `question` and `response` columns, wh
 
 ---
 
-## Batch Evaluation Results
+## 📊 Batch Evaluation Results
 
-After processing the uploaded CSV dataset, the system presents an aggregate summary along with the evaluation outcome for each response.
+After processing the uploaded CSV dataset, the system presents an aggregate summary of the batch evaluation results.
 
-The batch results dashboard includes:
+The Batch Evaluation Results dashboard displays:
 
-- Total, successful, partial, failed, and aggregated evaluation counts
-- Average quality score across successfully evaluated responses
-- Final verdict distribution across **Pass**, **Needs Improvement**, and **Fail**
-- Individual scores for Relevance, Accuracy, Hallucination, and Completeness
-- Overall quality score and final verdict for every evaluated response
-- Expandable detailed evaluation results for individual submissions
+- **Total Rows** — total number of CSV records processed.
+- **Successful** — number of rows that were fully evaluated.
+- **Partial** — number of incomplete evaluations.
+- **Failed** — number of evaluation failures.
+- **Average Score** — average quality score across successfully evaluated responses.
+- **Aggregated Rows** — number of successfully evaluated rows included in aggregate metrics.
+
+The interface also provides access to the uploaded dataset and allows users to **download the generated PDF evaluation report**.
 
 <p align="center">
     <img src="src/static/images/batch-evaluation-results.png"
-         alt="Batch Evaluation Results"
+         alt="Batch Evaluation Results Dashboard"
+         width="100%">
+</p>
+
+---
+
+## 📊 Evaluation Analytics Dashboard
+
+The Evaluation Analytics Dashboard provides an aggregate view of the quality of all successfully evaluated responses.
+
+It includes:
+
+- Average Relevance, Accuracy, Hallucination, and Completeness scores
+- Best and weakest performing dimensions
+- Hallucination frequency
+- Grounded response count
+- Average dimension score chart
+- Final verdict distribution
+- Overall quality trend across evaluated responses
+
+<p align="center">
+    <img src="src/static/images/evaluation-analytics-dashboard.png"
+         alt="Evaluation Analytics Dashboard"
+         width="100%">
+</p>
+
+---
+
+## 📋 Final Verdict Distribution & Individual Evaluation Results
+
+The final results section summarizes the distribution of evaluation verdicts and provides detailed results for each submitted response.
+
+It displays:
+
+- **Pass**, **Needs Improvement**, and **Fail** verdict counts
+- Individual Relevance, Accuracy, Hallucination, and Completeness scores
+- Overall evaluation score
+- Evaluation status
+- Final verdict for each response
+- Option to inspect the complete multi-agent evaluation details
+
+<p align="center">
+    <img src="src/static/images/verdict-distribution-and-individual-evaluation-results.png"
+         alt="Final Verdict Distribution and Individual Evaluation Results"
          width="100%">
 </p>
 
@@ -418,6 +546,7 @@ AI-Response-Quality-Evaluator/
 │   │   ├── batch_evaluator.py
 │   │   ├── retrieval.py
 │   │   ├── llm.py
+│   │   ├── pdf_report.py
 │   │   └── utils.py
 │   │
 │   ├── knowledge_base/
@@ -696,6 +825,30 @@ The project is being developed incrementally with a focus on building a reliable
 - [x] Sequential & Random Dataset Sampling
 - [x] Automated Validation Report Generation
 - [x] Batch Evaluation Module
+
+---
+
+## 🔮 Future Work
+
+- REST API development
+- Docker-based deployment
+- CI/CD integration
+- Cloud deployment
+- Expanded benchmark datasets
+- Larger and more diverse knowledge base
+- Database-backed evaluation history
+- Additional evaluation dimensions
+- Advanced analytics and filtering
+- Model comparison capabilities
+
+Potential additional evaluation dimensions include:
+
+- Safety
+- Bias
+- Clarity
+- Style
+- Citation quality
+- Instruction following
 
 ---
 
