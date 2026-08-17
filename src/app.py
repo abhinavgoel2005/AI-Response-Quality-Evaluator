@@ -23,9 +23,26 @@ latest_batch_results = None
 # EVALUATORS
 # ==========================================
 
-evaluator = ResponseEvaluator()
+evaluator = None
+batch_evaluator = None
 
-batch_evaluator = BatchEvaluator()
+
+def get_evaluator():
+    global evaluator
+
+    if evaluator is None:
+        evaluator = ResponseEvaluator()
+
+    return evaluator
+
+
+def get_batch_evaluator():
+    global batch_evaluator
+
+    if batch_evaluator is None:
+        batch_evaluator = BatchEvaluator()
+
+    return batch_evaluator
 
 
 # ==========================================
@@ -75,7 +92,7 @@ def evaluate():
     # Run Evaluation
     # --------------------------------------
 
-    results = evaluator.evaluate(
+    results = get_evaluator().evaluate(
         question,
         response,
         reference
@@ -167,7 +184,7 @@ def batch_evaluate():
     try:
 
         batch_results = (
-            batch_evaluator.evaluate_csv(
+            get_batch_evaluator().evaluate_csv(
                 file
             )
         )
