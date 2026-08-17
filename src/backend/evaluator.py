@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from agents.relevance_agent import RelevanceJudge
 from agents.accuracy_agent import AccuracyJudge
 from agents.hallucination_agent import HallucinationJudge
@@ -82,127 +83,117 @@ class ResponseEvaluator:
 
 
         # -----------------------------
-        # Relevance Agent
+        # Parallel Evaluation Agents
         # -----------------------------
 
-        try:
+        def run_relevance():
+            try:
+                return self.relevance_agent.evaluate(
+                    question,
+                    response
+                )
+            except Exception as e:
+                print("Relevance Agent Error:", e)
 
-            relevance_result = self.relevance_agent.evaluate(
-                question,
-                response
-            )
-
-        except Exception as e:
-
-            print("Relevance Agent Error:", e)
-
-            relevance_result = {
-                "score": None,
-                "status": "error",
-                "reason": "Relevance evaluation could not be completed."
-            }
+                return {
+                    "score": None,
+                    "status": "error",
+                    "reason":
+                        "Relevance evaluation could not be completed."
+                }
 
 
-        # -----------------------------
-        # Accuracy Agent
-        # -----------------------------
-
-        if grounding_available:
+        def run_accuracy():
+            if not grounding_available:
+                return {
+                    "score": None,
+                    "status": "unverifiable",
+                    "evidence":
+                        "No reference answer or sufficiently relevant "
+                        "retrieved evidence was available to verify "
+                        "the factual accuracy of this response."
+                }
 
             try:
-
-                accuracy_result = self.accuracy_agent.evaluate(
+                return self.accuracy_agent.evaluate(
                     question,
                     response,
                     reference,
                     retrieved_chunks
                 )
-
             except Exception as e:
-
                 print("Accuracy Agent Error:", e)
 
-                accuracy_result = {
+                return {
                     "score": None,
                     "status": "error",
-                    "evidence": "Accuracy evaluation could not be completed."
+                    "evidence":
+                        "Accuracy evaluation could not be completed."
                 }
 
-        else:
 
-            accuracy_result = {
-                "score": None,
-                "status": "unverifiable",
-                "evidence":
-                    "No reference answer or sufficiently relevant "
-                    "retrieved evidence was available to verify "
-                    "the factual accuracy of this response."
-            }
-
-
-        # -----------------------------
-        # Hallucination Agent
-        # -----------------------------
-
-        if grounding_available:
-
-            try:
-
-                hallucination_result = (
-                    self.hallucination_agent.evaluate(
-                        response,
-                        reference,
-                        retrieved_chunks
-                    )
-                )
-
-            except Exception as e:
-
-                print("Hallucination Agent Error:", e)
-
-                hallucination_result = {
+        def run_hallucination():
+            if not grounding_available:
+                return {
                     "score": None,
-                    "status": "error",
-                    "reason": "Hallucination evaluation could not be completed.",
+                    "status": "unverifiable",
+                    "reason":
+                        "No reference answer or sufficiently relevant "
+                        "retrieved evidence was available to determine "
+                        "whether the response contains unsupported claims.",
                     "unsupported_claims": []
                 }
 
-        else:
+            try:
+                return self.hallucination_agent.evaluate(
+                    response,
+                    reference,
+                    retrieved_chunks
+                )
+            except Exception as e:
+                print("Hallucination Agent Error:", e)
 
-            hallucination_result = {
-                "score": None,
-                "status": "unverifiable",
-                "reason":
-                    "No reference answer or sufficiently relevant "
-                    "retrieved evidence was available to determine "
-                    "whether the response contains unsupported claims.",
-                "unsupported_claims": []
-            }
+                return {
+                    "score": None,
+                    "status": "error",
+                    "reason":
+                        "Hallucination evaluation could not be completed.",
+                    "unsupported_claims": []
+                }
 
 
-        # -----------------------------
-        # Completeness Agent
-        # -----------------------------
-
-        try:
-
-            completeness_result = (
-                self.completeness_agent.evaluate(
+        def run_completeness():
+            try:
+                return self.completeness_agent.evaluate(
                     question,
                     response
                 )
-            )
+            except Exception as e:
+                print("Completeness Agent Error:", e)
 
-        except Exception as e:
+                return {
+                    "score": None,
+                    "status": "error",
+                    "omissions": [],
+                    "reason":
+                        "Completeness evaluation could not be completed."
+                }
 
-            print("Completeness Agent Error:", e)
 
-            completeness_result = {
-                "score": None,
-                "status": "error",
-                "omissions": [],
-                "reason": "Completeness evaluation could not be completed."
+        # Run independent agents concurrently.
+        with ThreadPoolExecutor(max_workers=4) as executor:
+
+            futures = {
+                "relevance": executor.submit(run_relevance),
+                "accuracy": executor.submit(run_accuracy),
+                "hallucination": executor.submit(run_hallucination),
+                "completeness": executor.submit(run_completeness)
             }
+
+            relevance_result = futures["relevance"].result()
+            accuracy_result = futures["accuracy"].result()
+            hallucination_result = futures["hallucination"].result()
+            completeness_result = futures["completeness"].result()
 
         # -----------------------------
         # Verdict Agent

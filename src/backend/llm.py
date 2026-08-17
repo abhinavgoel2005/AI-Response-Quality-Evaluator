@@ -88,7 +88,9 @@ def generate_response(prompt: str) -> str:
 
             temperature=TEMPERATURE,
 
-            max_tokens=MAX_TOKENS
+            max_tokens=MAX_TOKENS,
+
+            timeout=30.0
         )
 
 

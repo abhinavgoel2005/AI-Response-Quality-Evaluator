@@ -694,41 +694,38 @@ document.addEventListener("DOMContentLoaded", () => {
             },
 
             options: {
-
                 responsive: true,
+                maintainAspectRatio: false,
 
                 interaction: {
-
-                    mode: "nearest",
-
-                    intersect: true
-
+                    mode: "index",
+                    intersect: false
                 },
 
                 plugins: {
-
                     tooltip: {
+                        enabled: true,
+                        mode: "index",
+                        intersect: false,
 
-                        mode: "nearest",
+                        callbacks: {
+                            title: function (tooltipItems) {
+                                return tooltipItems[0].label;
+                            },
 
-                        intersect: true
-
+                            label: function (context) {
+                                return " Overall Score: " + context.parsed.y + "/10";
+                            }
+                        }
                     }
-
                 },
 
                 scales: {
-
                     y: {
-
                         beginAtZero: true,
-
                         max: 10
-
                     }
-
                 }
-
             }
         });
 

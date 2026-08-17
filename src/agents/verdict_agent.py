@@ -474,18 +474,79 @@ Requirements:
 
 
         # -----------------------------
-        # Generate Verdict Summary
+        # Generate Deterministic Summary
         # -----------------------------
 
-        consolidated_summary = self._generate_summary(
-            relevance_result,
-            accuracy_result,
-            hallucination_result,
-            completeness_result,
-            overall_score,
-            verdict,
-            quality_gate_reasons
-        )
+        summary_parts = []
+
+        if verdict == "Pass":
+            summary_parts.append(
+                "The AI response demonstrated strong overall quality "
+                "across the evaluated dimensions."
+            )
+
+        elif verdict == "Needs Improvement":
+            summary_parts.append(
+                "The AI response was partially satisfactory but has "
+                "areas that require improvement."
+            )
+
+        else:
+            summary_parts.append(
+                "The AI response has significant quality issues "
+                "that require correction."
+            )
+
+
+        # Hallucination findings
+        if hallucination_score is not None:
+
+            if hallucination_score >= 8:
+                summary_parts.append(
+                    "The response was largely well grounded with "
+                    "no significant unsupported claims identified."
+                )
+
+            elif hallucination_score >= 5:
+                summary_parts.append(
+                    "Some unsupported or insufficiently grounded "
+                    "claims were identified."
+                )
+
+            else:
+                summary_parts.append(
+                    "Significant unsupported or contradictory claims "
+                    "were identified."
+                )
+
+
+        # Accuracy findings
+        if accuracy_score is not None and accuracy_score < 7:
+
+            summary_parts.append(
+                "Factual accuracy was below the preferred threshold."
+            )
+
+
+        # Completeness findings
+        if completeness_score is not None and completeness_score < 7:
+
+            summary_parts.append(
+                "The response also omitted some aspects required "
+                "for a complete answer."
+            )
+
+
+        # Grounding availability
+        if unverifiable_dimensions:
+
+            summary_parts.append(
+                "Some dimensions could not be fully verified because "
+                "sufficient grounding evidence was unavailable."
+            )
+
+
+        consolidated_summary = " ".join(summary_parts)
 
 
         # -----------------------------

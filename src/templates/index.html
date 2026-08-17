@@ -1101,169 +1101,173 @@
         <section class="batch-results-section">
 
 
-            <!-- RESULTS HEADER -->
+            <!-- BATCH OVERVIEW -->
+            <section class="batch-overview-card">
 
-            <div class="batch-results-header">
+                <!-- RESULTS HEADER -->
+                <div class="batch-results-header">
 
-                <div>
+                    <div>
 
-                    <span class="batch-label">
-                        Evaluation Complete
-                    </span>
+                        <span class="batch-label">
+                            Evaluation Complete
+                        </span>
 
-                    <h2>
-                        Batch Evaluation Results
-                    </h2>
+                        <h2>
+                            Batch Evaluation Results
+                        </h2>
 
-                    <p>
-                        Aggregate statistics and individual
-                        evaluation outcomes for the uploaded dataset.
-                    </p>
+                        <p>
+                            Aggregate statistics and individual
+                            evaluation outcomes for the uploaded dataset.
+                        </p>
 
-                </div>
-
-
-                <div class="batch-header-actions">
-
-                    {% if batch_filename %}
-
-                    <div class="dataset-badge">
-                        📄 {{ batch_filename }}
                     </div>
 
-                    {% endif %}
 
-                    <a
-                        href="/download-report"
-                        class="download-report-btn"
-                    >
-                        📄 Download PDF Report
-                    </a>
+                    <div class="batch-header-actions">
 
-                </div>
+                        {% if batch_filename %}
 
-            </div>
-
-
-            <!-- ==================================
-                 SUMMARY CARDS
-            =================================== -->
-
-            <div class="batch-summary-grid">
-
-
-                <article class="batch-stat-card">
-
-                    <span class="batch-stat-label">
-                        Total Rows
-                    </span>
-
-                    <strong>
-                        {{ batch_results.total_rows }}
-                    </strong>
-
-                    <small>
-                        CSV records processed
-                    </small>
-
-                </article>
-
-
-                <article class="batch-stat-card stat-success">
-
-                    <span class="batch-stat-label">
-                        Successful
-                    </span>
-
-                    <strong>
-                        {{ batch_results.successful_rows }}
-                    </strong>
-
-                    <small>
-                        Fully evaluated rows
-                    </small>
-
-                </article>
-
-
-                <article class="batch-stat-card stat-partial">
-
-                    <span class="batch-stat-label">
-                        Partial
-                    </span>
-
-                    <strong>
-                        {{ batch_results.partial_rows }}
-                    </strong>
-
-                    <small>
-                        Incomplete evaluations
-                    </small>
-
-                </article>
-
-
-                <article class="batch-stat-card stat-failed">
-
-                    <span class="batch-stat-label">
-                        Failed
-                    </span>
-
-                    <strong>
-                        {{ batch_results.failed_rows }}
-                    </strong>
-
-                    <small>
-                        Evaluation failures
-                    </small>
-
-                </article>
-
-
-                <article class="batch-stat-card stat-score">
-
-                    <span class="batch-stat-label">
-                        Average Score
-                    </span>
-
-                    <strong>
-
-                        {% if batch_results.average_score is not none %}
-
-                            {{ batch_results.average_score }}/10
-
-                        {% else %}
-
-                            N/A
+                        <div class="dataset-badge">
+                            📄 {{ batch_filename }}
+                        </div>
 
                         {% endif %}
 
-                    </strong>
+                        <a
+                            href="/download-report"
+                            class="download-report-btn"
+                        >
+                            📄 Download PDF Report
+                        </a>
 
-                    <small>
-                        Successful scored rows
-                    </small>
+                    </div>
 
-                </article>
+                </div>
 
 
-                <article class="batch-stat-card">
+                <!-- ==================================
+                    SUMMARY CARDS
+                =================================== -->
 
-                    <span class="batch-stat-label">
-                        Aggregated Rows
-                    </span>
+                <div class="batch-summary-grid">
 
-                    <strong>
-                        {{ batch_results.aggregated_rows }}
-                    </strong>
 
-                    <small>
-                        Used in aggregate metrics
-                    </small>
+                    <article class="batch-stat-card">
 
-                </article>
+                        <span class="batch-stat-label">
+                            Total Rows
+                        </span>
 
-            </div>
+                        <strong>
+                            {{ batch_results.total_rows }}
+                        </strong>
+
+                        <small>
+                            CSV records processed
+                        </small>
+
+                    </article>
+
+
+                    <article class="batch-stat-card stat-success">
+
+                        <span class="batch-stat-label">
+                            Successful
+                        </span>
+
+                        <strong>
+                            {{ batch_results.successful_rows }}
+                        </strong>
+
+                        <small>
+                            Fully evaluated rows
+                        </small>
+
+                    </article>
+
+
+                    <article class="batch-stat-card stat-partial">
+
+                        <span class="batch-stat-label">
+                            Partial
+                        </span>
+
+                        <strong>
+                            {{ batch_results.partial_rows }}
+                        </strong>
+
+                        <small>
+                            Incomplete evaluations
+                        </small>
+
+                    </article>
+
+
+                    <article class="batch-stat-card stat-failed">
+
+                        <span class="batch-stat-label">
+                            Failed
+                        </span>
+
+                        <strong>
+                            {{ batch_results.failed_rows }}
+                        </strong>
+
+                        <small>
+                            Evaluation failures
+                        </small>
+
+                    </article>
+
+
+                    <article class="batch-stat-card stat-score">
+
+                        <span class="batch-stat-label">
+                            Average Score
+                        </span>
+
+                        <strong>
+
+                            {% if batch_results.average_score is not none %}
+
+                                {{ batch_results.average_score }}/10
+
+                            {% else %}
+
+                                N/A
+
+                            {% endif %}
+
+                        </strong>
+
+                        <small>
+                            Successful scored rows
+                        </small>
+
+                    </article>
+
+
+                    <article class="batch-stat-card">
+
+                        <span class="batch-stat-label">
+                            Aggregated Rows
+                        </span>
+
+                        <strong>
+                            {{ batch_results.aggregated_rows }}
+                        </strong>
+
+                        <small>
+                            Used in aggregate metrics
+                        </small>
+
+                    </article>
+
+                </div>
+
+            </section>
 
             <!-- ==================================
                 EVALUATION ANALYTICS

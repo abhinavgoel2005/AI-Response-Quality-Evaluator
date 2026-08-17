@@ -40,10 +40,12 @@ class HallucinationJudge:
             return {
                 "score": None,
                 "unsupported_claims": [],
+                "contradicted_claims": [],
                 "reason":
                     "No reference answer or sufficiently relevant "
                     "retrieved evidence was available to determine "
-                    "whether the response contains unsupported claims."
+                    "whether the response contains unsupported claims.",
+                "grounded": None
             }
 
         reference_text = (
@@ -58,20 +60,35 @@ class HallucinationJudge:
             else "Not available."
         )
 
+        grounding_context = f"""
+        REFERENCE ANSWER:
+        {reference_text}
+
+        RETRIEVED EVIDENCE:
+        {rag_text}
+        """
+
         # -----------------------------
         # Prompt
         # -----------------------------
 
         prompt = f"""
-You are a factual grounding evaluator.
+You are a factual grounding evaluator for an AI response evaluation system.
 
-Determine whether factual claims in the AI Response are supported by
-the Grounding Evidence.
+Your task is to evaluate whether the factual claims made in the AI Response
+are supported by the available Grounding Evidence.
 
-AI Response:
+Do NOT evaluate relevance, completeness, writing quality, or style.
+
+==================================================
+AI-GENERATED RESPONSE
+==================================================
+
 {response}
 
-Grounding Evidence:
+==================================================
+GROUNDING EVIDENCE
+==================================================
 
 Reference Answer:
 {reference_text}
@@ -79,70 +96,133 @@ Reference Answer:
 Retrieved Evidence:
 {rag_text}
 
-IMPORTANT DEFINITION:
+==================================================
+CLAIM EVALUATION RULES
+==================================================
 
-A hallucination is a factual claim whose MEANING is contradicted by
-the grounding evidence or cannot be supported by the grounding evidence.
+For each meaningful factual claim in the AI Response, determine its grounding
+status.
 
-Compare MEANING, not wording.
+1. SUPPORTED
+A claim is SUPPORTED when the available evidence supports its factual meaning.
 
-The following MUST NOT be considered hallucinations:
+2. UNSUPPORTED
+A claim is UNSUPPORTED when the available evidence does not provide enough
+information to support or verify the claim.
 
-- paraphrases
-- synonymous wording
-- grammatical differences
-- shorter or longer phrasing
-- standard abbreviations
-- standard acronyms
+3. CONTRADICTED
+A claim is CONTRADICTED when the available evidence clearly conflicts with
+the claim.
+
+IMPORTANT:
+
+Compare MEANING, not exact wording.
+
+Do NOT mark a claim as unsupported merely because:
+- it uses different wording
+- it is a paraphrase
+- it uses synonyms
+- the sentence structure is different
+- it is shorter or longer
+- it uses a standard abbreviation or acronym
 
 For example:
 
-"RAG combines information retrieval with generative language models."
+"Overfitting happens when a model memorizes training data and performs poorly
+on unseen data."
 
 and
 
-"Retrieval-Augmented Generation combines information retrieval with
-generative language models."
+"Overfitting occurs when a model learns the training data too closely and
+fails to generalize."
 
-express the SAME factual claim.
+express essentially the same factual meaning and should be considered
+SUPPORTED if the evidence supports that meaning.
 
-Therefore the first statement MUST NOT be marked unsupported when the
-second statement is supported by the evidence.
+==================================================
+CLAIM SEVERITY
+==================================================
 
-Do not evaluate whether the response is detailed enough.
-Do not evaluate completeness.
-Do not evaluate relevance.
-Do not penalize wording differences.
+For every unsupported or contradicted claim, determine its severity.
 
-For each factual claim, ask only:
+MAJOR:
+- The claim is central to the answer.
+- The claim defines the main concept incorrectly.
+- The claim gives an important factual explanation.
+- The claim substantially changes the meaning of the answer.
+- The claim is a major fabricated or contradictory fact.
 
-"Does the available evidence support the factual meaning of this claim?"
+MINOR:
+- The claim is a small additional detail.
+- The claim does not substantially change the main meaning of the answer.
+- The claim is a minor unsupported factual addition.
 
-If YES:
-The claim is supported.
+For example:
 
-If NO:
-The claim is unsupported.
+Question:
+"What is cloud computing?"
 
-Return ONLY valid JSON:
+Response:
+"Cloud computing means storing files on Google Drive."
+
+The claim is MAJOR because it gives an incorrect and overly narrow definition
+of the main concept.
+
+==================================================
+IMPORTANT SCORING GUIDANCE
+==================================================
+
+Do NOT assign a hallucination score yourself.
+
+Only identify:
+- factual claims
+- their grounding status
+- their severity
+
+The final hallucination score will be calculated deterministically by the
+application.
+
+A perfectly grounded response should contain no unsupported or contradicted
+claims.
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return ONLY valid JSON.
+
+Use exactly this structure:
 
 {{
-    "unsupported_claims": [
-        "exact unsupported claim"
+    "claim_analysis": [
+        {{
+            "claim": "factual claim from the response",
+            "status": "supported | unsupported | contradicted",
+            "severity": "major | minor"
+        }}
     ],
-    "reason": "Brief explanation based only on factual grounding."
+    "unsupported_claims": [
+        "unsupported claim"
+    ],
+    "contradicted_claims": [
+        "contradicted claim"
+    ],
+    "reason": "Short explanation of the overall grounding quality."
 }}
 
-If every factual claim is supported:
+Rules:
 
-{{
-    "unsupported_claims": [],
-    "reason": "All factual claims are supported by the available grounding evidence."
-}}
-
-Do not return a score.
-Do not use markdown.
-Do not use JSON code fences.
+- Include meaningful factual claims in claim_analysis.
+- Use "supported" for claims whose meaning is supported by the evidence.
+- Use "unsupported" when the evidence cannot support the claim.
+- Use "contradicted" only when the evidence clearly conflicts with the claim.
+- Do not confuse lack of evidence with contradiction.
+- Do not penalize valid paraphrasing.
+- Mark the central or defining incorrect claim as "major".
+- Keep unsupported_claims and contradicted_claims concise.
+- Return valid JSON only.
+- Do not use markdown.
+- Do not use JSON code fences.
 """
 
         # -----------------------------
@@ -164,37 +244,127 @@ Do not use JSON code fences.
         if not isinstance(unsupported_claims, list):
             unsupported_claims = []
 
+        contradicted_claims = parsed.get(
+            "contradicted_claims",
+            []
+        )
+
+        if not isinstance(contradicted_claims, list):
+            contradicted_claims = []
+
         reason = parsed.get(
             "reason",
             ""
         )
+        # -----------------------------
+        # Claim Analysis
+        # -----------------------------
+
+        claim_analysis = parsed.get(
+            "claim_analysis",
+            []
+        )
+
+        if not isinstance(claim_analysis, list):
+            claim_analysis = []
+
+        contradicted_claims = parsed.get(
+            "contradicted_claims",
+            []
+        )
+
+        if not isinstance(contradicted_claims, list):
+            contradicted_claims = []
 
         # -----------------------------
-        # Deterministic Score
+        # Deterministic Hallucination Score
         # -----------------------------
 
-        if not unsupported_claims:
+        major_unsupported = 0
+        minor_unsupported = 0
+        major_contradicted = 0
+        minor_contradicted = 0
 
-            score = 10
+        for claim in claim_analysis:
 
-        elif len(unsupported_claims) == 1:
+            if not isinstance(claim, dict):
+                continue
 
-            score = 7
+            status = str(
+                claim.get("status", "")
+            ).strip().lower()
 
-        elif len(unsupported_claims) == 2:
+            severity = str(
+                claim.get("severity", "minor")
+            ).strip().lower()
 
-            score = 4
+            if status == "unsupported":
 
-        else:
+                if severity == "major":
+                    major_unsupported += 1
+                else:
+                    minor_unsupported += 1
 
-            score = 2
+            elif status == "contradicted":
+
+                if severity == "major":
+                    major_contradicted += 1
+                else:
+                    minor_contradicted += 1
+
+
+        # Start with a perfectly grounded score.
+        score = 10
+
+        # Major contradicted claims are the most serious.
+        score -= major_contradicted * 7
+
+        # Major unsupported claims significantly reduce grounding quality.
+        score -= major_unsupported * 5
+
+        # Minor contradictions are serious, but less damaging.
+        score -= minor_contradicted * 3
+
+        # Minor unsupported claims have a smaller impact.
+        score -= minor_unsupported * 2
+
+        # Keep score within the valid 0-10 range.
+        score = max(0, min(10, score))
 
         # -----------------------------
         # Final Result
         # -----------------------------
 
+        # Derive claim lists from claim_analysis
+        # so that claim_analysis remains the single
+        # source of truth for grounding decisions.
+
+        unsupported_claims = [
+            claim.get("claim", "")
+            for claim in claim_analysis
+            if isinstance(claim, dict)
+            and str(claim.get("status", "")).strip().lower() == "unsupported"
+            and claim.get("claim")
+        ]
+
+        contradicted_claims = [
+            claim.get("claim", "")
+            for claim in claim_analysis
+            if isinstance(claim, dict)
+            and str(claim.get("status", "")).strip().lower() == "contradicted"
+            and claim.get("claim")
+        ]
+
+        grounded = (
+            len(unsupported_claims) == 0
+            and len(contradicted_claims) == 0
+        )
+
         return {
             "score": score,
             "unsupported_claims": unsupported_claims,
-            "reason": reason
+            "contradicted_claims": contradicted_claims,
+            "claim_analysis": claim_analysis,
+            "reason": reason,
+            "grounded": grounded
         }
