@@ -1,9 +1,7 @@
 import json
 import os
-import faiss
-
-from sentence_transformers import SentenceTransformer
-
+import re
+import math
 
 # ==========================================
 # PATH CONFIGURATION
@@ -21,29 +19,78 @@ KNOWLEDGE_BASE_PATH = os.path.join(
     "knowledge_base.json"
 )
 
+# ==========================================
+# OPTIONAL SENTENCE TRANSFORMER
+# ==========================================
+
+_model = None
+_model_failed = False
+
+
+def get_model():
+    """
+    Load Sentence Transformer only when actually needed.
+    This prevents Render from loading the model during startup.
+    """
+
+    global _model
+    global _model_failed
+
+    if _model is not None:
+        return _model
+
+    if _model_failed:
+        return None
+
+    try:
+        # Reduce CPU/thread overhead
+        try:
+            import torch
+            torch.set_num_threads(1)
+        except Exception:
+            pass
+
+        from sentence_transformers import SentenceTransformer
+
+        print("Loading embedding model...")
+
+        _model = SentenceTransformer(
+            "all-MiniLM-L6-v2",
+            device="cpu"
+        )
+
+        print("Embedding model loaded successfully.")
+
+        return _model
+
+    except Exception as e:
+        print("Embedding model unavailable:", e)
+        print("Using lightweight retrieval fallback.")
+
+        _model_failed = True
+        return None
+
 
 # ==========================================
-# EMBEDDING MODEL
+# KNOWLEDGE RETRIEVER
 # ==========================================
-
-model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
-
 
 class KnowledgeRetriever:
 
     def __init__(self, similarity_threshold=0.35):
 
         self.documents = []
+
         self.index = None
 
-        # Minimum similarity required for a document
-        # to be treated as relevant evidence.
         self.similarity_threshold = similarity_threshold
 
+        # Do NOT load the transformer model here.
+        # Only load the knowledge base.
         self._load_knowledge_base()
-        self._build_index()
+
+        # Model and FAISS index are created lazily.
+        self._initialized = False
 
 
     # ==========================================
@@ -51,8 +98,6 @@ class KnowledgeRetriever:
     # ==========================================
 
     def _load_knowledge_base(self):
-
-        """Load documents from knowledge_base.json."""
 
         with open(
             KNOWLEDGE_BASE_PATH,
@@ -75,37 +120,149 @@ class KnowledgeRetriever:
 
     def _build_index(self):
 
-        """
-        Generate document embeddings
-        and build a FAISS index.
-        """
+        if self._initialized:
+            return
 
-        texts = [
+        model = get_model()
 
-            f"{document['title']}. {document['content']}"
+        if model is None:
+            return
 
-            for document in self.documents
-        ]
+        try:
 
-        embeddings = model.encode(
-            texts,
-            convert_to_numpy=True
-        ).astype("float32")
+            import faiss
 
-        # Normalize vectors so inner product
-        # behaves as cosine similarity.
+            texts = [
+                f"{document['title']}. {document['content']}"
+                for document in self.documents
+            ]
 
-        faiss.normalize_L2(embeddings)
+            embeddings = model.encode(
+                texts,
+                convert_to_numpy=True,
+                batch_size=1,
+                show_progress_bar=False
+            ).astype("float32")
 
-        dimension = embeddings.shape[1]
+            faiss.normalize_L2(embeddings)
 
-        self.index = faiss.IndexFlatIP(
-            dimension
+            dimension = embeddings.shape[1]
+
+            self.index = faiss.IndexFlatIP(
+                dimension
+            )
+
+            self.index.add(
+                embeddings
+            )
+
+            self._initialized = True
+
+            print("FAISS index created successfully.")
+
+        except Exception as e:
+
+            print("FAISS initialization failed:", e)
+
+            self.index = None
+
+
+    # ==========================================
+    # LIGHTWEIGHT TOKENIZATION
+    # ==========================================
+
+    def _tokenize(self, text):
+
+        text = text.lower()
+
+        return set(
+            re.findall(
+                r"\b[a-z0-9]+\b",
+                text
+            )
         )
 
-        self.index.add(
-            embeddings
+
+    # ==========================================
+    # LIGHTWEIGHT FALLBACK RETRIEVAL
+    # ==========================================
+
+    def _fallback_retrieve(
+        self,
+        question,
+        top_k=3
+    ):
+
+        question_tokens = self._tokenize(
+            question
         )
+
+        if not question_tokens:
+            return []
+
+        scored_documents = []
+
+        for document in self.documents:
+
+            text = (
+                str(document.get("title", ""))
+                + " "
+                + str(document.get("content", ""))
+            )
+
+            document_tokens = self._tokenize(
+                text
+            )
+
+            if not document_tokens:
+                continue
+
+            intersection = (
+                question_tokens
+                & document_tokens
+            )
+
+            # Simple Jaccard-style similarity
+            union = (
+                question_tokens
+                | document_tokens
+            )
+
+            score = (
+                len(intersection)
+                / len(union)
+                if union
+                else 0
+            )
+
+            if score > 0:
+
+                scored_documents.append(
+                    (
+                        score,
+                        document
+                    )
+                )
+
+        scored_documents.sort(
+            key=lambda x: x[0],
+            reverse=True
+        )
+
+        results = []
+
+        for score, document in scored_documents[:top_k]:
+
+            results.append(
+                {
+                    "id": document.get("id"),
+                    "title": document.get("title"),
+                    "content": document.get("content"),
+                    "score": float(score)
+                }
+            )
+
+        return results
 
 
     # ==========================================
@@ -119,21 +276,8 @@ class KnowledgeRetriever:
         similarity_threshold=None
     ):
 
-        """
-        Retrieve documents relevant to the question.
-
-        Documents below the similarity threshold
-        are rejected instead of being passed to
-        evaluation agents as evidence.
-        """
-
         if not question or not question.strip():
-
             return []
-
-
-        # Use instance threshold unless caller
-        # explicitly provides another one.
 
         if similarity_threshold is None:
 
@@ -141,80 +285,89 @@ class KnowledgeRetriever:
                 self.similarity_threshold
             )
 
+        # --------------------------------------
+        # Try semantic RAG
+        # --------------------------------------
 
-        # ------------------------------------------
-        # Generate query embedding
-        # ------------------------------------------
+        model = get_model()
 
-        query_embedding = model.encode(
-            [question],
-            convert_to_numpy=True
-        ).astype("float32")
+        if model is not None:
 
-        faiss.normalize_L2(
-            query_embedding
-        )
+            try:
 
+                self._build_index()
 
-        # ------------------------------------------
-        # Search FAISS
-        # ------------------------------------------
+                if self.index is not None:
 
-        top_k = min(
-            top_k,
-            len(self.documents)
-        )
+                    import faiss
 
-        scores, indices = self.index.search(
-            query_embedding,
+                    query_embedding = model.encode(
+                        [question],
+                        convert_to_numpy=True,
+                        batch_size=1,
+                        show_progress_bar=False
+                    ).astype("float32")
+
+                    faiss.normalize_L2(
+                        query_embedding
+                    )
+
+                    top_k = min(
+                        top_k,
+                        len(self.documents)
+                    )
+
+                    scores, indices = (
+                        self.index.search(
+                            query_embedding,
+                            top_k
+                        )
+                    )
+
+                    results = []
+
+                    for score, index in zip(
+                        scores[0],
+                        indices[0]
+                    ):
+
+                        if index == -1:
+                            continue
+
+                        score = float(score)
+
+                        if score < similarity_threshold:
+                            continue
+
+                        document = self.documents[index]
+
+                        results.append(
+                            {
+                                "id": document.get("id"),
+                                "title": document.get("title"),
+                                "content": document.get("content"),
+                                "score": score
+                            }
+                        )
+
+                    return results
+
+            except Exception as e:
+
+                print(
+                    "Semantic retrieval failed:",
+                    e
+                )
+
+                print(
+                    "Switching to lightweight retrieval."
+                )
+
+        # --------------------------------------
+        # Fallback retrieval
+        # --------------------------------------
+
+        return self._fallback_retrieve(
+            question,
             top_k
         )
-
-
-        # ------------------------------------------
-        # Filter retrieved documents
-        # ------------------------------------------
-
-        results = []
-
-        for score, index in zip(
-            scores[0],
-            indices[0]
-        ):
-
-            if index == -1:
-
-                continue
-
-
-            score = float(score)
-
-
-            # Reject weak semantic matches.
-
-            if score < similarity_threshold:
-
-                continue
-
-
-            document = self.documents[index]
-
-
-            results.append({
-
-                "id":
-                    document["id"],
-
-                "title":
-                    document["title"],
-
-                "content":
-                    document["content"],
-
-                "similarity_score":
-                    score
-
-            })
-
-
-        return results
