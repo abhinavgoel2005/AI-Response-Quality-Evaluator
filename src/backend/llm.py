@@ -32,7 +32,7 @@ client = Groq(
 # MODEL CONFIGURATION
 # =========================================================
 
-MODEL_NAME = "llama-3.1-8b-instant"
+MODEL_NAME = "openai/gpt-oss-20b"
 
 TEMPERATURE = 0.1
 MAX_TOKENS = 1024
@@ -76,21 +76,16 @@ def generate_response(prompt: str) -> str:
     try:
 
         completion = client.chat.completions.create(
-
             model=MODEL_NAME,
-
             messages=[
                 {
                     "role": "user",
                     "content": prompt.strip()
                 }
             ],
-
             temperature=TEMPERATURE,
-
             max_tokens=MAX_TOKENS,
-
-            timeout=30.0
+            timeout=60.0
         )
 
 

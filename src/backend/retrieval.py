@@ -2,6 +2,8 @@ import json
 import os
 import re
 import math
+from collections import Counter
+
 
 # ==========================================
 # PATH CONFIGURATION
@@ -19,78 +21,59 @@ KNOWLEDGE_BASE_PATH = os.path.join(
     "knowledge_base.json"
 )
 
-# ==========================================
-# OPTIONAL SENTENCE TRANSFORMER
-# ==========================================
-
-_model = None
-_model_failed = False
-
-
-def get_model():
-    """
-    Load Sentence Transformer only when actually needed.
-    This prevents Render from loading the model during startup.
-    """
-
-    global _model
-    global _model_failed
-
-    if _model is not None:
-        return _model
-
-    if _model_failed:
-        return None
-
-    try:
-        # Reduce CPU/thread overhead
-        try:
-            import torch
-            torch.set_num_threads(1)
-        except Exception:
-            pass
-
-        from sentence_transformers import SentenceTransformer
-
-        print("Loading embedding model...")
-
-        _model = SentenceTransformer(
-            "all-MiniLM-L6-v2",
-            device="cpu"
-        )
-
-        print("Embedding model loaded successfully.")
-
-        return _model
-
-    except Exception as e:
-        print("Embedding model unavailable:", e)
-        print("Using lightweight retrieval fallback.")
-
-        _model_failed = True
-        return None
-
 
 # ==========================================
-# KNOWLEDGE RETRIEVER
+# LIGHTWEIGHT TEXT RETRIEVER
 # ==========================================
 
 class KnowledgeRetriever:
 
-    def __init__(self, similarity_threshold=0.35):
+    def __init__(self, similarity_threshold=0.05):
 
         self.documents = []
-
-        self.index = None
+        self.document_vectors = {}
+        self.idf = {}
 
         self.similarity_threshold = similarity_threshold
 
-        # Do NOT load the transformer model here.
-        # Only load the knowledge base.
         self._load_knowledge_base()
+        self._build_index()
 
-        # Model and FAISS index are created lazily.
-        self._initialized = False
+
+    # ==========================================
+    # TEXT TOKENIZATION
+    # ==========================================
+
+    def _tokenize(self, text):
+
+        if not text:
+            return []
+
+        text = text.lower()
+
+        # Keep only words/numbers
+        tokens = re.findall(
+            r"\b[a-zA-Z0-9]+\b",
+            text
+        )
+
+        # Remove very common words
+        stop_words = {
+            "the", "is", "a", "an", "and",
+            "or", "of", "to", "in", "on",
+            "for", "with", "from", "by",
+            "as", "at", "are", "was",
+            "were", "be", "been", "this",
+            "that", "it", "its", "into",
+            "can", "may", "will", "how",
+            "what", "which", "who", "why"
+        }
+
+        return [
+            token
+            for token in tokens
+            if token not in stop_words
+        ]
 
 
     # ==========================================
@@ -98,6 +81,14 @@ class KnowledgeRetriever:
     # ==========================================
 
     def _load_knowledge_base(self):
+
+        if not os.path.exists(
+            KNOWLEDGE_BASE_PATH
+        ):
+            raise FileNotFoundError(
+                "Knowledge base not found: "
+                + KNOWLEDGE_BASE_PATH
+            )
 
         with open(
             KNOWLEDGE_BASE_PATH,
@@ -115,92 +106,18 @@ class KnowledgeRetriever:
 
 
     # ==========================================
-    # BUILD FAISS INDEX
+    # BUILD LIGHTWEIGHT INDEX
     # ==========================================
 
     def _build_index(self):
 
-        if self._initialized:
-            return
+        document_frequencies = Counter()
 
-        model = get_model()
+        tokenized_documents = []
 
-        if model is None:
-            return
-
-        try:
-
-            import faiss
-
-            texts = [
-                f"{document['title']}. {document['content']}"
-                for document in self.documents
-            ]
-
-            embeddings = model.encode(
-                texts,
-                convert_to_numpy=True,
-                batch_size=1,
-                show_progress_bar=False
-            ).astype("float32")
-
-            faiss.normalize_L2(embeddings)
-
-            dimension = embeddings.shape[1]
-
-            self.index = faiss.IndexFlatIP(
-                dimension
-            )
-
-            self.index.add(
-                embeddings
-            )
-
-            self._initialized = True
-
-            print("FAISS index created successfully.")
-
-        except Exception as e:
-
-            print("FAISS initialization failed:", e)
-
-            self.index = None
-
-
-    # ==========================================
-    # LIGHTWEIGHT TOKENIZATION
-    # ==========================================
-
-    def _tokenize(self, text):
-
-        text = text.lower()
-
-        return set(
-            re.findall(
-                r"\b[a-z0-9]+\b",
-                text
-            )
-        )
-
-
-    # ==========================================
-    # LIGHTWEIGHT FALLBACK RETRIEVAL
-    # ==========================================
-
-    def _fallback_retrieve(
-        self,
-        question,
-        top_k=3
-    ):
-
-        question_tokens = self._tokenize(
-            question
-        )
-
-        if not question_tokens:
-            return []
-
-        scored_documents = []
+        # --------------------------------------
+        # Tokenize documents
+        # --------------------------------------
 
         for document in self.documents:
 
@@ -210,59 +127,119 @@ class KnowledgeRetriever:
                 + str(document.get("content", ""))
             )
 
-            document_tokens = self._tokenize(
-                text
-            )
+            tokens = self._tokenize(text)
 
-            if not document_tokens:
-                continue
+            tokenized_documents.append(tokens)
 
-            intersection = (
-                question_tokens
-                & document_tokens
-            )
+            unique_tokens = set(tokens)
 
-            # Simple Jaccard-style similarity
-            union = (
-                question_tokens
-                | document_tokens
-            )
+            for token in unique_tokens:
+                document_frequencies[token] += 1
 
-            score = (
-                len(intersection)
-                / len(union)
-                if union
-                else 0
-            )
 
-            if score > 0:
+        # --------------------------------------
+        # Calculate IDF
+        # --------------------------------------
 
-                scored_documents.append(
-                    (
-                        score,
-                        document
-                    )
-                )
-
-        scored_documents.sort(
-            key=lambda x: x[0],
-            reverse=True
+        total_documents = len(
+            self.documents
         )
 
-        results = []
+        for token, frequency in document_frequencies.items():
 
-        for score, document in scored_documents[:top_k]:
+            self.idf[token] = math.log(
+                (total_documents + 1)
+                / (frequency + 1)
+            ) + 1
 
-            results.append(
-                {
-                    "id": document.get("id"),
-                    "title": document.get("title"),
-                    "content": document.get("content"),
-                    "score": float(score)
-                }
+
+        # --------------------------------------
+        # Build TF-IDF vectors
+        # --------------------------------------
+
+        for document, tokens in zip(
+            self.documents,
+            tokenized_documents
+        ):
+
+            term_frequency = Counter(tokens)
+
+            vector = {}
+
+            total_tokens = len(tokens)
+
+            if total_tokens > 0:
+
+                for token, count in term_frequency.items():
+
+                    tf = count / total_tokens
+
+                    vector[token] = (
+                        tf * self.idf.get(
+                            token,
+                            1.0
+                        )
+                    )
+
+            self.document_vectors[
+                document["id"]
+            ] = vector
+
+
+    # ==========================================
+    # COSINE SIMILARITY
+    # ==========================================
+
+    def _cosine_similarity(
+        self,
+        query_vector,
+        document_vector
+    ):
+
+        if not query_vector:
+            return 0.0
+
+        if not document_vector:
+            return 0.0
+
+        common_tokens = (
+            set(query_vector.keys())
+            & set(document_vector.keys())
+        )
+
+        if not common_tokens:
+            return 0.0
+
+        dot_product = sum(
+            query_vector[token]
+            * document_vector[token]
+            for token in common_tokens
+        )
+
+        query_norm = math.sqrt(
+            sum(
+                value * value
+                for value in query_vector.values()
             )
+        )
 
-        return results
+        document_norm = math.sqrt(
+            sum(
+                value * value
+                for value in document_vector.values()
+            )
+        )
+
+        if (
+            query_norm == 0
+            or document_norm == 0
+        ):
+            return 0.0
+
+        return (
+            dot_product
+            / (query_norm * document_norm)
+        )
 
 
     # ==========================================
@@ -285,89 +262,96 @@ class KnowledgeRetriever:
                 self.similarity_threshold
             )
 
-        # --------------------------------------
-        # Try semantic RAG
-        # --------------------------------------
-
-        model = get_model()
-
-        if model is not None:
-
-            try:
-
-                self._build_index()
-
-                if self.index is not None:
-
-                    import faiss
-
-                    query_embedding = model.encode(
-                        [question],
-                        convert_to_numpy=True,
-                        batch_size=1,
-                        show_progress_bar=False
-                    ).astype("float32")
-
-                    faiss.normalize_L2(
-                        query_embedding
-                    )
-
-                    top_k = min(
-                        top_k,
-                        len(self.documents)
-                    )
-
-                    scores, indices = (
-                        self.index.search(
-                            query_embedding,
-                            top_k
-                        )
-                    )
-
-                    results = []
-
-                    for score, index in zip(
-                        scores[0],
-                        indices[0]
-                    ):
-
-                        if index == -1:
-                            continue
-
-                        score = float(score)
-
-                        if score < similarity_threshold:
-                            continue
-
-                        document = self.documents[index]
-
-                        results.append(
-                            {
-                                "id": document.get("id"),
-                                "title": document.get("title"),
-                                "content": document.get("content"),
-                                "score": score
-                            }
-                        )
-
-                    return results
-
-            except Exception as e:
-
-                print(
-                    "Semantic retrieval failed:",
-                    e
-                )
-
-                print(
-                    "Switching to lightweight retrieval."
-                )
 
         # --------------------------------------
-        # Fallback retrieval
+        # Create query vector
         # --------------------------------------
 
-        return self._fallback_retrieve(
-            question,
-            top_k
+        query_tokens = self._tokenize(
+            question
         )
+
+        if not query_tokens:
+            return []
+
+        query_counts = Counter(
+            query_tokens
+        )
+
+        total_query_tokens = len(
+            query_tokens
+        )
+
+        query_vector = {}
+
+        for token, count in query_counts.items():
+
+            tf = (
+                count
+                / total_query_tokens
+            )
+
+            query_vector[token] = (
+                tf * self.idf.get(
+                    token,
+                    1.0
+                )
+            )
+
+
+        # --------------------------------------
+        # Calculate similarity
+        # --------------------------------------
+
+        results = []
+
+        for document in self.documents:
+
+            document_id = document["id"]
+
+            document_vector = (
+                self.document_vectors.get(
+                    document_id,
+                    {}
+                )
+            )
+
+            score = self._cosine_similarity(
+                query_vector,
+                document_vector
+            )
+
+            if score >= similarity_threshold:
+
+                results.append({
+
+                    "id":
+                        document["id"],
+
+                    "title":
+                        document["title"],
+
+                    "content":
+                        document["content"],
+
+                    "similarity_score":
+                        float(score)
+                })
+
+
+        # --------------------------------------
+        # Sort by relevance
+        # --------------------------------------
+
+        results.sort(
+            key=lambda x:
+                x["similarity_score"],
+            reverse=True
+        )
+
+
+        # --------------------------------------
+        # Return top results
+        # --------------------------------------
+
+        return results[:top_k]
