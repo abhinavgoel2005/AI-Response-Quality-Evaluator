@@ -28,3 +28,5 @@ groq
 
 # Production Server
 gunicorn
+
+reportlab
