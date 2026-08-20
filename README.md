@@ -5,11 +5,11 @@
 <p align="center">
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Flask](https://img.shields.io/badge/Flask-Web_App-black)
-![Groq](https://img.shields.io/badge/Groq-openai/gpt-oss-20b-orange)
+![Flask](https://img.shields.io/badge/Flask-Web_App-green)
+![Groq](https://img.shields.io/badge/Groq-openai%2Fgpt--oss--20b-orange)
 ![RAG](https://img.shields.io/badge/RAG-Enabled-green)
 ![TruthfulQA](https://img.shields.io/badge/Benchmark-TruthfulQA-orange)
-![License](https://img.shields.io/badge/License-MIT-success)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
 </p>
 
