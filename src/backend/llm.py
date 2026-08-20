@@ -35,7 +35,7 @@ client = Groq(
 MODEL_NAME = "openai/gpt-oss-20b"
 
 TEMPERATURE = 0.1
-MAX_TOKENS = 1024
+MAX_TOKENS = 512
 
 
 # =========================================================

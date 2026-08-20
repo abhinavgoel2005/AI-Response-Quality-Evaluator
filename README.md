@@ -6,7 +6,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Flask](https://img.shields.io/badge/Flask-Web_App-black)
-![Groq](https://img.shields.io/badge/Groq-Llama_3.1_8B-orange)
+![Groq](https://img.shields.io/badge/Groq-openai/gpt-oss-20b-orange)
 ![RAG](https://img.shields.io/badge/RAG-Enabled-green)
 ![TruthfulQA](https://img.shields.io/badge/Benchmark-TruthfulQA-orange)
 ![License](https://img.shields.io/badge/License-MIT-success)
@@ -434,7 +434,7 @@ Detailed documentation is available inside the **docs/** directory.
 |---|---|
 | Backend | Python, Flask |
 | LLM Provider | Groq |
-| LLM | Llama 3.1 8B Instant |
+| LLM | OpenAI GPT-OSS 20B |
 | Embeddings | Sentence Transformers (`all-MiniLM-L6-v2`) |
 | Vector Search | FAISS |
 | Evaluation Architecture | Multi-Agent Evaluation Framework |
